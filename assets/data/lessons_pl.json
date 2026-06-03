@@ -1,0 +1,278 @@
+[
+  {
+    "id": "Lekcja 1",
+    "topic": "Sztuczna Inteligencja",
+    "category": "Podstawy Sztucznej Inteligencji",
+    "type": "slides",
+    "title": "Na czym polega działanie sztucznej inteligencji?",
+    "slides": [
+      {
+        "text": "**Chatboty** to narzędzia oparte na sztucznej inteligencji. Słowo _„inteligencja”_ może wprowadzać w błąd – czat w rzeczywistości nas nie rozumie. Dlaczego tak często odpowiada trafnie na zadane pytania?",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "Chatboty nie potrafią mówić w naszym języku - potrafią jedynie ocenić **prawdopodobieństwo** wystąpienia sekwencji słów, dzięki wcześniejszej analizie ogromnych baz danych. Innymi słowy, powtarzają to, co _najczęściej_ pojawiało się w tekstach przez nie analizowanych.",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "To oznacza, że chatboty są również **ograniczone** co do danych i informacji zebranych w danym modelu. Dane, na których opierają swoją pracę, mogą zawierać _kłamstwa i nieścisłości_ - co powinno zwrócić naszą uwagę.",
+        "chartType": "none",
+        "chartData": []
+      }
+    ]
+  },
+  {
+    "id": "Quiz 1.1",
+    "topic": "Sztuczna Inteligencja",
+    "category": "Podstawy Sztucznej Inteligencji",
+    "type": "swipe",
+    "title": "Na czym polega działanie sztucznej inteligencji?",
+    "question": "Czat oparty na zbiorach danych **do 2021** jest w stanie odpowiedzieć prawidłowo na pytanie dotyczące najnowszych odkryć naukowych.",
+    "correctAnswer": false,
+    "explanation": "**Lorem ipsum** dolor sit amet, consectetur _adipiscing_ elit, sed do eiusmod tempor."
+  },
+  {
+    "id": "Quiz 1.2",
+    "topic": "Sztuczna Inteligencja",
+    "category": "Podstawy Sztucznej Inteligencji",
+    "type": "swipe",
+    "title": "Na czym polega działanie sztucznej inteligencji?",
+    "question": "Chatbot _„trenowany”_ na **niezweryfikowanych danych** będzie wprowadzać użytkownika w błąd",
+    "correctAnswer": true,
+    "explanation": "**Lorem ipsum** dolor sit amet, consectetur _adipiscing_ elit, sed do eiusmod tempor."
+  },
+  
+  {
+    "id": "Lekcja 2",
+    "topic": "Sztuczna Inteligencja",
+    "category": "AI search",
+    "type": "slides",
+    "title": "AI jako skrót w wyszukiwarkach",
+    "slides": [
+      {
+        "text": "Obecnie większość wyszukiwarek wzbogaconych jest o **skrót AI**. Często znajdujemy tam odpowiedź na nurtujące pytanie i pomijamy dalsze poszukiwania informacji i analizę różnych artykułów.",
+        "chartType": "none",
+        "chartData": [],
+        "imagePath": "https://picsum.photos/600/400"
+      },
+      {
+        "text": "Pamiętaj, że to **AI wybiera** co jest _“najważniejsze”_ i jednocześnie może pominąć wiele istotnych szczegółów. Czasem brak tych niuansów może doprowadzić do zakrzywionej lub błędnej interpretacji. Ponadto **nie weryfikuje** strony, z której czerpie informacje - to my jako użytkownicy musimy ocenić, czy źródło jest godne zaufania (o czym będziemy wspominać w kolejnych lekcjach).",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "Być może widziałeś memy, które śmieją się z absurdalnych odpowiedzi AI. Pamiętajmy, że czasami coś, co na pierwszy rzut oka wydaje się **logiczne**, też może okazać się **bzdurą**.",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "Skrót AI _nie zawsze_ pokazuje linki, _nie zawsze_ cytuje dokładnie, _nie zawsze widać_ źródło pochodzenia danej informacji. **To Ty** powinieneś upewnić się, że możesz ufać informacji, którą widzisz.",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "Uważaj na skróty AI szczególnie jeżeli poszukujesz informacji **prawnej**, **medycznej**, **finansowej** czy **politycznej** - uzyskanie złej wiedzy w tych tematach może nieść za sobą poważne konsekwencje.",
+        "chartType": "none",
+        "chartData": []
+      }
+    ]
+  },
+  {
+    "id": "Ciekawostka_2",
+    "topic": "Sztuczna Inteligencja",
+    "category": "Podstawy Sztucznej Inteligencji",
+    "type": "slides",
+    "title": "Czy wiesz, że...?",
+    "slides": [
+      {
+        "text": "Jeżeli wpisując hasło w wyszukiwarkę na końcu dopiszesz `-ai`, to otrzymasz wyniki bez podsumowania **AI**. Umożliwia to porównywanie stron internetowych bez sugerowania się interpretacją AI.",
+        "chartType": "none",
+        "chartData": []
+      }
+    ]
+  },
+  {
+    "id": "Quiz 2",
+    "topic": "Sztuczna Inteligencja",
+    "category": "Podstawy Sztucznej Inteligencji",
+    "type": "mcq",
+    "title": "AI jako skrót w wyszukiwarkach",
+    "question": "Czy skrót AI w wyszukiwarkach zawsze podaje wiarygodne informacje z potwierdzonych źródeł?",
+    "options": [
+      "Nie, AI nie weryfikuje źródeł i może pomijać istotne szczegóły",
+      "Tak, każda informacja podawana przez AI jest w pełni sprawdzona",
+      "Tak, ale tylko w tematach medycznych i prawnych",
+      "Nie, skróty AI nigdy nie podają żadnych przydatnych informacji"
+    ],
+    "correctOptionIndex": 0,
+    "explanation": "Skrót AI w wyszukiwarkach często nie weryfikuje stron źródłowych i wybiera wybiórcze fakty, dlatego należy zawsze zachować czujność."
+  },
+  {
+    "id": "Lekcja 3.1",
+    "topic": "Sztuczna Inteligencja",
+    "category": "Generowanie obrazów",
+    "type": "slides",
+    "title": "W jaki sposób AI jest w stanie tworzyć zdjęcia?",
+    "slides": [
+      {
+        "text": " Tak jak w przypadku zadawania pytań czatowi – odpowiedzi nie biorą się z próżni. **Generatory zdjęć AI** korzystają dużych zbiorów istniejących obrazów na podstawie których się _„uczą”_, by następnie generować zdjęcia.",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "**Zagrożenia:** Generatory nie tylko tworzą zdjęcia na podstawie ogromnej bazy tych istniejących, ale także _podrabiają styl artystów_.",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "**Zagrożenia:** Generator zdjęć **nie jest artystą**. Jeśli dostanie polecenie stworzenia komiksu na zadany temat, użyje do tego istniejących w swojej bazie danych dzieł.",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "**Zagrożenia:** Generatory są ciągle udoskonalane, ale zawsze mogą im się zdarzyć **niedociągnięcia** - zwłaszcza przy generowaniu tekstu na obrazku bądź licznych szczegółów.",
+        "chartType": "none",
+        "chartData": []
+      }
+    ]
+  },
+  {
+    "id": "Quiz 3.1",
+    "topic": "Sztuczna Inteligencja",
+    "category": "Generowanie obrazów",
+    "type": "mcq",
+    "title": "W jaki sposób AI jest w stanie tworzyć zdjęcia?",
+    "question": "Na jakiej zasadzie działają generatory zdjęć oparte o AI?",
+    "options": [
+      "„Uczą się” na dużych zbiorach istniejących obrazów i na tej podstawie generują nowe",
+      "Posiadają wbudowaną prawdziwą ludzką kreatywność i malują od zera",
+      "Pobierają losowe grafiki z wyszukiwarki Google i wyświetlają je bez zmian",
+      "Rysują tylko geometryczne kształty i wykresy statystyczne"
+    ],
+    "correctOptionIndex": 0,
+    "explanation": "Generatory AI potrzebują ogromnych zbiorów obrazów treningowych, aby nauczyć się wzorców i stylów, które następnie naśladują."
+  },
+  {
+    "id": "Lekcja 3.2",
+    "topic": "Sztuczna Inteligencja",
+    "category": "Generowanie obrazów",
+    "type": "slides",
+    "title": " Podrabianie zdjęć, przerabianie zdjęć,…",
+    "slides": [
+      {
+        "text": "Zdjęcia wytworzone przez sztuczną inteligencję uwiarygodniają **fałszywe informacje**. Za pomocą `deepfake’ów` można zniszczyć czyjąś reputację, generując filmik z fałszywą wypowiedzią.",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "Pamiętaj, że tak samo jak można wykorzystać sztuczną inteligencję do stworzenia zdjęcia, tak i można ją użyć do **wykrycia**, czy dane zdjęcie jest prawdziwe lub stworzone przez AI.",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "Jeżeli masz podejrzenie, że dane zdjęcie jest nieprawdziwe, **nie rozpowszechniaj go** w sieci. Powstrzymasz w ten sposób **dezinformację**. ",
+        "chartType": "none",
+        "chartData": []
+      }
+     
+    ]
+  },
+  {
+    "id": "Lekcja 4",
+    "topic": "Sztuczna Inteligencja",
+    "category": "Bezpieczeństwo",
+    "type": "slides",
+    "title": "Udostępnione zdjęcia",
+    "slides": [
+      {
+        "text": "Większość z nas udostępnia jakieś informacje o sobie w internecie. Czasem dzielimy się zdjęciem psa w social mediach, czasem otrzymanym dyplomem lub spotkaniem w gronie znajomych.",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "Każde zdjęcie to **ślad cyfrowy**!",
+        "chartType": "none",
+        "chartData": []
+      },
+      {
+        "text": "Są jednak zdjęcia, które niosą ze sobą _szczególne ryzyko_.",
+        "chartType": "none",
+        "chartData": []
+      }
+     
+    ]
+  },
+  {
+    "id": "quiz_005",
+    "topic": "Lorem Ipsum 2",
+    "category": "topic2",
+    "type": "swipe",
+    "title": "Lorem Ipsum Swipe Quiz B",
+    "question": "Duis aute irure dolor in reprehenderit in voluptate? (True/False)",
+    "correctAnswer": false,
+    "explanation": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia."
+  },
+  {
+    "id": "quiz_006",
+    "topic": "Lorem Ipsum 3",
+    "category": "topic3",
+    "type": "mcq",
+    "title": "Lorem Ipsum MCQ Quiz B",
+    "question": "Excepteur sint occaecat cupidatat non proident?",
+    "options": [
+      "Lorem Ipsum Option A",
+      "Lorem Ipsum Option B",
+      "Lorem Ipsum Option C",
+      "Lorem Ipsum Option D"
+    ],
+    "correctOptionIndex": 2,
+    "explanation": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore."
+  },
+  {
+    "id": "lesson_001",
+    "topic": "Lorem Ipsum 1",
+    "category": "topic1",
+    "type": "slides",
+    "title": "Lorem Ipsum Dolor A",
+    "slides": [
+      {
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "chartType": "line",
+        "chartData": [10, 25, 45, 80, 150]
+      },
+      {
+        "text": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+        "chartType": "bar",
+        "chartData": [30, 80, 50, 90, 110]
+      }
+    ]
+  },
+  {
+    "id": "quiz_002",
+    "topic": "Lorem Ipsum 2",
+    "category": "topic2",
+    "type": "swipe",
+    "title": "Lorem Ipsum Swipe Quiz",
+    "question": "Lorem ipsum dolor sit amet, consectetur adipiscing elit? (True/False)",
+    "correctAnswer": true,
+    "explanation": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor."
+  },
+  {
+    "id": "quiz_003",
+    "topic": "Lorem Ipsum 3",
+    "category": "topic3",
+    "type": "mcq",
+    "title": "Lorem Ipsum MCQ Quiz",
+    "question": "Lorem ipsum dolor sit amet, consectetur adipiscing elit?",
+    "options": [
+      "Lorem Ipsum Option A",
+      "Lorem Ipsum Option B",
+      "Lorem Ipsum Option C",
+      "Lorem Ipsum Option D"
+    ],
+    "correctOptionIndex": 0,
+    "explanation": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor."
+  }
+]
