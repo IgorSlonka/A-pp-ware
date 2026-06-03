@@ -1,6 +1,6 @@
-// This file defines the TemplateMcq widget, representing multiple-choice questions (MCQs).
-// It displays a markdown question prompt, list selectors for answers, color-coded feedback
-// (green for correct, red for incorrect), and a detailed explanation reveal card upon answering.
+/// This file defines the TemplateMcq widget, representing multiple-choice questions (MCQs).
+/// It displays a markdown question prompt, list selectors for answers, color-coded feedback
+/// (green for correct, red for incorrect), and a detailed explanation reveal card upon answering.
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import '../models/lesson_model.dart';
@@ -10,7 +10,7 @@ class TemplateMcq extends StatefulWidget {
   final Function(bool wasCorrect) onAnswerSubmitted;
 
   const TemplateMcq({
-    // Constructor instantiating the MCQ template, receiving a Lesson data model and answer callbacks.
+    /// Constructor instantiating the MCQ template, receiving a Lesson data model and answer callbacks.
     super.key,
     required this.lesson,
     required this.onAnswerSubmitted,
@@ -25,7 +25,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
   bool _revealed = false;
 
   Color get _categoryColor {
-    // Dynamic color picker matching categories to brand tokens (Fuchsia, Cyan, Emerald).
+    /// Dynamic color picker matching categories to brand tokens (Fuchsia, Cyan, Emerald).
     switch (widget.lesson.category.toLowerCase()) {
       case 'topic1':
         return const Color(0xFFD946EF);
@@ -39,7 +39,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
   }
 
   void _submitAnswer(int index) {
-    // Handles option selection actions, triggers parent review logging, and reveals correction feedback.
+    /// Handles option selection actions, triggers parent review logging, and reveals correction feedback.
     if (_revealed) return;
 
     setState(() {
@@ -53,7 +53,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
 
   @override
   Widget build(BuildContext context) {
-    // Renders the MCQ viewport containing categories, markdown questions, options list, and explanation boxes.
+    /// Renders the MCQ viewport containing categories, markdown questions, options list, and explanation boxes.
     final options = widget.lesson.options ?? [];
 
     final categoryColor = _categoryColor;
@@ -64,7 +64,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 125.0), // Spacer for top HUD
+          SizedBox(height: MediaQuery.of(context).padding.top + 82.0), // Spacer for top HUD
 
           // Category Tag
           Container(
@@ -160,7 +160,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
   }
 
   Widget _buildOptionButton(int index, String optionText) {
-    // Renders individual interactive option buttons, coloring border highlights green/red after a selection is locked in.
+    /// Renders individual interactive option buttons, coloring border highlights green/red after a selection is locked in.
     Color borderColor = Colors.white.withOpacity(0.1);
     Color fillColor = const Color(0xFF1E1E2F);
     Widget? trailingIcon;
@@ -220,7 +220,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
   }
 
   Widget _buildExplanationBox() {
-    // Renders a bottom panel explaining the correct choice in detail using markdown.
+    /// Renders a bottom panel explaining the correct choice in detail using markdown.
     final bool wasCorrect = _selectedOptionIndex == widget.lesson.correctOptionIndex;
 
     return Container(

@@ -1,19 +1,26 @@
-// This file defines the SocialSidebar widget, which houses TikTok-like floating action buttons.
-// It includes controls to Save (bookmark), Learn (read chapter explanation dialogs),
-// Share (copy link), and Skip (transition to next lesson segment) in a floating glassmorphic stack.
+/// This file defines the SocialSidebar widget, which houses TikTok-like floating action buttons.
+/// It includes controls to Save (bookmark), Learn (read chapter explanation dialogs),
+/// Share (copy link), and Skip (transition to next lesson segment) in a floating glassmorphic stack.
 import 'package:flutter/material.dart';
+import '../services/translations.dart';
 
 class SocialSidebar extends StatefulWidget {
   final String topic;
   final String? explanation;
   final VoidCallback? onSkipSectionPressed;
+  final bool isBookmarked;
+  final Function(bool isBookmarked) onBookmarkChanged;
+  final String languageCode;
 
   const SocialSidebar({
-    // Constructor defining essential action callbacks and chapter explanation text nodes.
+    /// Constructor defining essential action callbacks and chapter explanation text nodes.
     super.key,
     required this.topic,
     this.explanation,
     this.onSkipSectionPressed,
+    required this.isBookmarked,
+    required this.onBookmarkChanged,
+    required this.languageCode,
   });
 
   @override
@@ -21,17 +28,13 @@ class SocialSidebar extends StatefulWidget {
 }
 
 class _SocialSidebarState extends State<SocialSidebar> {
-  bool _isBookmarked = false;
-
   void _toggleBookmark() {
-    // Toggles the local bookmark state (Saved status flag) and updates the sidebar state.
-    setState(() {
-      _isBookmarked = !_isBookmarked;
-    });
+    /// Toggles the bookmark state (Saved status flag) and updates the sidebar state.
+    widget.onBookmarkChanged(!widget.isBookmarked);
   }
 
   void _showExplanationDialog(BuildContext context) {
-    // Renders a stylized glassmorphic modal dialogue containing helpful details and guidelines for the current chapter.
+    /// Renders a stylized glassmorphic modal dialogue containing helpful details and guidelines for the current chapter.
     showDialog(
       context: context,
       builder: (BuildContext ctx) {
@@ -163,7 +166,7 @@ class _SocialSidebarState extends State<SocialSidebar> {
   }
 
   Widget _buildToggleButton() {
-    // Builds the primary vertical expansion button controlling speed dial visibility and toggle rotations.
+    /// Builds the primary vertical expansion button controlling speed dial visibility and toggle rotations.
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -204,7 +207,7 @@ class _SocialSidebarState extends State<SocialSidebar> {
 
   @override
   Widget build(BuildContext context) {
-    // Renders the column stack positioning the floating action speed-dials relative to the screen layout.
+    /// Renders the column stack positioning the floating action speed-dials relative to the screen layout.
     return Padding(
       padding: const EdgeInsets.only(right: 16.0, bottom: 24.0),
       child: Column(
@@ -237,10 +240,17 @@ class _SocialSidebarState extends State<SocialSidebar> {
                   label: "Share",
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Link copied to clipboard!"),
-                        duration: Duration(seconds: 1),
-                        backgroundColor: Color(0xFF1E1E2F),
+                      SnackBar(
+                        content: Text(
+                          AppTranslations.translate(widget.languageCode, 'link_copied'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        duration: const Duration(seconds: 1),
+                        backgroundColor: const Color(0xFF1E1E2F),
                       ),
                     );
                   },
@@ -256,14 +266,24 @@ class _SocialSidebarState extends State<SocialSidebar> {
                 // Option 0: Save (Bottommost)
                 _buildAnimatedOption(
                   index: 0,
-                  icon: _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                  iconColor: _isBookmarked ? Colors.amber : Colors.white,
-                  label: _isBookmarked ? "Saved" : "Save",
+                  icon: widget.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                  iconColor: widget.isBookmarked ? Colors.amber : Colors.white,
+                  label: widget.isBookmarked ? "Saved" : "Save",
                   onTap: () {
+                    final targetSavedState = !widget.isBookmarked;
                     _toggleBookmark();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(_isBookmarked ? "Removed from bookmarks" : "Saved to bookmarks!"),
+                        content: Text(
+                          targetSavedState
+                              ? AppTranslations.translate(widget.languageCode, 'bookmark_added')
+                              : AppTranslations.translate(widget.languageCode, 'bookmark_removed'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
                         duration: const Duration(seconds: 1),
                         backgroundColor: const Color(0xFF1E1E2F),
                       ),

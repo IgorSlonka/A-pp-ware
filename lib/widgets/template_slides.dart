@@ -1,6 +1,6 @@
-// This file defines the TemplateSlides widget, representing horizontal slideshow decks.
-// It includes support for parsing Markdown body texts, rendering custom charts (via CustomPainter),
-// and displaying linear dots trackers aligned beautifully beneath the slides.
+/// This file defines the TemplateSlides widget, representing horizontal slideshow decks.
+/// It includes support for parsing Markdown body texts, rendering custom charts (via CustomPainter),
+/// and displaying linear dots trackers aligned beautifully beneath the slides.
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import '../models/lesson_model.dart';
@@ -10,7 +10,7 @@ class TemplateSlides extends StatefulWidget {
   final VoidCallback? onSlidesCompleted;
 
   const TemplateSlides({
-    // Constructor instantiating the horizontal slide viewer, taking lesson data and slide completion callbacks.
+    /// Constructor instantiating the horizontal slide viewer, taking lesson data and slide completion callbacks.
     super.key,
     required this.lesson,
     this.onSlidesCompleted,
@@ -26,7 +26,7 @@ class _TemplateSlidesState extends State<TemplateSlides> {
 
   @override
   void initState() {
-    // Sets up slide listeners and marks lessons completed automatically if they contain one or fewer slides.
+    /// Sets up slide listeners and marks lessons completed automatically if they contain one or fewer slides.
     super.initState();
     // If there is only one slide, it starts completed
     final slides = widget.lesson.slides ?? [];
@@ -41,13 +41,13 @@ class _TemplateSlidesState extends State<TemplateSlides> {
 
   @override
   void dispose() {
-    // Disposes page controller resources to prevent active memory leaks.
+    /// Disposes page controller resources to prevent active memory leaks.
     _pageController.dispose();
     super.dispose();
   }
 
   Widget _buildImageWidget(String path) {
-    // Resolves and displays network or local asset images dynamically.
+    /// Resolves and displays network or local asset images dynamically.
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return Image.network(
         path,
@@ -69,7 +69,7 @@ class _TemplateSlidesState extends State<TemplateSlides> {
 
   @override
   Widget build(BuildContext context) {
-    // Renders the slideshow container including swipeable pages, navigation chevrons, and bottom dots.
+    /// Renders the slideshow container including swipeable pages, navigation chevrons, and bottom dots.
     final slides = widget.lesson.slides ?? [];
 
     if (slides.isEmpty) {
@@ -98,12 +98,12 @@ class _TemplateSlidesState extends State<TemplateSlides> {
 
     return Container(
       color: const Color(0xFF0F0F1A), // Deep Slate dark mode
-      padding: const EdgeInsets.only(left: 20.0, top: 32.0, bottom: 24.0, right: 20.0),
+      padding: const EdgeInsets.only(left: 20.0, top: 32.0, bottom: 32.0, right: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header / Topic tag
-          const SizedBox(height: 125.0), // Spacing for top HUD
+          SizedBox(height: MediaQuery.of(context).padding.top + 82.0), // Spacing for top HUD
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -307,7 +307,7 @@ class _TemplateSlidesState extends State<TemplateSlides> {
               ],
             ),
           ),
-          const SizedBox(height: 24.0),
+          const SizedBox(height: 26.0),
           SizedBox(
             width: double.infinity,
             height: 16.0,
@@ -362,14 +362,14 @@ class EducationalChartPainter extends CustomPainter {
   final List<double> data;
 
   EducationalChartPainter({
-    // Constructor for the custom chart painter, receiving diagram types and numeric plot arrays.
+    /// Constructor for the custom chart painter, receiving diagram types and numeric plot arrays.
     required this.chartType,
     required this.data,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draws horizontal grids, bar shapes, lines, point markers, and color gradient fills.
+    /// Draws horizontal grids, bar shapes, lines, point markers, and color gradient fills.
     if (data.isEmpty) return;
 
     final paintGrid = Paint()
@@ -490,7 +490,7 @@ class EducationalChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    // Informs the Flutter engine if the canvas painter should repaint; returns false since data is static.
+    /// Informs the Flutter engine if the canvas painter should repaint; returns false since data is static.
     return false;
   }
 }

@@ -1,7 +1,7 @@
-// This file defines the FeedScreen widget, representing the main application screen.
-// It integrates a TikTok-like vertical swipe feed with gamification elements like streaks,
-// XP goals, and accuracy stats. It supports multiple tabs (Feed, Explore, Search, Summary)
-// and handles learning sessions populated dynamically from a local database of lessons.
+/// This file defines the FeedScreen widget, representing the main application screen.
+/// It integrates a TikTok-like vertical swipe feed with gamification elements like streaks,
+/// XP goals, and accuracy stats. It supports multiple tabs (Feed, Explore, Search, Summary)
+/// and handles learning sessions populated dynamically from a local database of lessons.
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../services/feed_engine.dart';
@@ -17,7 +17,7 @@ class FeedScreen extends StatefulWidget {
   final String languageCode;
 
   const FeedScreen({
-    // Constructor for the primary FeedScreen, passing the current localization language code.
+    /// Constructor for the primary FeedScreen, passing the current localization language code.
     super.key,
     required this.languageCode,
   });
@@ -48,6 +48,9 @@ class _FeedScreenState extends State<FeedScreen> {
   final Set<String> _interactedLessonIds = {};
   int _cardsReviewed = 0;
 
+  // Bookmarked Lesson IDs
+  final Set<String> _bookmarkedLessonIds = {};
+
   // Overall Quiz Performance (Overall Accuracy calculation)
   int _overallTotalQuizzes = 0;
   int _overallCorrectQuizzes = 0;
@@ -66,20 +69,20 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   void initState() {
-    // Initializes the screen state and triggers lazy loading of lesson resources.
+    /// Initializes the screen state and triggers lazy loading of lesson resources.
     super.initState();
     _initFeedEngine();
   }
 
   @override
   void dispose() {
-    // Cleans up controllers and hardware listeners to prevent memory leaks.
+    /// Cleans up controllers and hardware listeners to prevent memory leaks.
     _pageController.dispose();
     super.dispose();
   }
 
   Future<void> _initFeedEngine() async {
-    // Connects to the local JSON database via FeedEngine to download relevant curriculum nodes.
+    /// Connects to the local JSON database via FeedEngine to download relevant curriculum nodes.
     await _feedEngine.loadLessons(widget.languageCode);
     _generateNewSession();
     setState(() {
@@ -90,7 +93,7 @@ class _FeedScreenState extends State<FeedScreen> {
   /// Generates a new lesson segment group of random size 5 to 12.
   /// Resets active session quiz scores.
   void _generateNewSession() {
-    // Generates a random set of 5 to 12 lessons for the current learning round and resets session scores.
+    /// Generates a random set of 5 to 12 lessons for the current learning round and resets session scores.
     _sessionLessons.clear();
     _sessionTotalQuestions = 0;
     _sessionCorrectQuestions = 0;
@@ -107,7 +110,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Triggered when the user scrolls past the summary card
   void _loadNextSession() {
-    // Resets session context and jumps the PageView index back to the beginning of the slide deck.
+    /// Resets session context and jumps the PageView index back to the beginning of the slide deck.
     setState(() {
       _generateNewSession();
     });
@@ -116,7 +119,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Instant skip callback (bypass summary, launch next section)
   void _handleSkipSection() {
-    // Skip action that bypasses summary entirely, instantly loading a fresh deck of randomized cards.
+    /// Skip action that bypasses summary entirely, instantly loading a fresh deck of randomized cards.
     setState(() {
       _generateNewSession();
     });
@@ -124,7 +127,14 @@ class _FeedScreenState extends State<FeedScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppTranslations.translate(widget.languageCode, 'section_skipped')),
+        content: Text(
+          AppTranslations.translate(widget.languageCode, 'section_skipped'),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
         duration: const Duration(seconds: 1),
         backgroundColor: const Color(0xFF1E1E2F),
       ),
@@ -133,7 +143,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Called upon MCQ/Swipe quiz submission
   void _handleAnswerSubmitted(String lessonId, bool wasCorrect) {
-    // Processes a submitted user answer (MCQ or Swipe), updates XP, pass states, and validates daily goals.
+    /// Processes a submitted user answer (MCQ or Swipe), updates XP, pass states, and validates daily goals.
     _feedEngine.recordReview(lessonId, wasCorrect);
 
     // Fetch the lesson object to pull metadata
@@ -166,7 +176,14 @@ class _FeedScreenState extends State<FeedScreen> {
           _currentXp = _currentXp - _xpGoal;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppTranslations.translate(widget.languageCode, 'streak_extended_goal') + "$_streak" + AppTranslations.translate(widget.languageCode, 'days')),
+              content: Text(
+                AppTranslations.translate(widget.languageCode, 'streak_extended_goal') + "$_streak" + AppTranslations.translate(widget.languageCode, 'days'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
               backgroundColor: const Color(0xFF58CC02),
               duration: const Duration(seconds: 3),
             ),
@@ -180,7 +197,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Called when the user completes a slide deck
   void _handleSlideCompleted(String lessonId, String category) {
-    // Processes slide review completions, awarding flat XP and updating completed counts.
+    /// Processes slide review completions, awarding flat XP and updating completed counts.
     _feedEngine.recordReview(lessonId, true);
 
     if (!_interactedLessonIds.contains(lessonId)) {
@@ -197,7 +214,14 @@ class _FeedScreenState extends State<FeedScreen> {
           _currentXp = _currentXp - _xpGoal;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppTranslations.translate(widget.languageCode, 'streak_extended_slide') + "$_streak" + AppTranslations.translate(widget.languageCode, 'days')),
+              content: Text(
+                AppTranslations.translate(widget.languageCode, 'streak_extended_slide') + "$_streak" + AppTranslations.translate(widget.languageCode, 'days'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
               backgroundColor: const Color(0xFF58CC02),
               duration: const Duration(seconds: 3),
             ),
@@ -209,7 +233,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Standard Flutter build method establishing the global scaffold and floating navigation structures.
+    /// Standard Flutter build method establishing the global scaffold and floating navigation structures.
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFF0F0F1A),
@@ -253,7 +277,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildActiveTabContent() {
-    // Router utility returning the corresponding tab view content depending on selected bottom navigation index.
+    /// Router utility returning the corresponding tab view content depending on selected bottom navigation index.
     switch (_selectedTabIndex) {
       case 0:
         return _buildMainFeedTab();
@@ -270,7 +294,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- TAB 0: MAIN TIKTOK FEED (Segmented Groups & Transitions) ---
   Widget _buildMainFeedTab() {
-    // Constructs the vertical scrolling PageView representing the main TikTok-style microlearning feed.
+    /// Constructs the vertical scrolling PageView representing the main TikTok-style microlearning feed.
     return PageView.builder(
       scrollDirection: Axis.vertical,
       controller: _pageController,
@@ -302,6 +326,17 @@ class _FeedScreenState extends State<FeedScreen> {
                     topic: lesson.topic,
                     explanation: lesson.explanation,
                     onSkipSectionPressed: _handleSkipSection,
+                    isBookmarked: _bookmarkedLessonIds.contains(lesson.id),
+                    languageCode: widget.languageCode,
+                    onBookmarkChanged: (isBookmarked) {
+                      setState(() {
+                        if (isBookmarked) {
+                          _bookmarkedLessonIds.add(lesson.id);
+                        } else {
+                          _bookmarkedLessonIds.remove(lesson.id);
+                        }
+                      });
+                    },
                   ),
                 ),
               ),
@@ -326,14 +361,14 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Renders a beautiful completed overview card showing accuracy percentage
   Widget _buildSectionSummaryCard() {
-    // Builds a card overlay summary upon completing a lesson deck, visualizing accuracy and performance scores.
+    /// Builds a card overlay summary upon completing a lesson deck, visualizing accuracy and performance scores.
     final double accuracy = _sessionTotalQuestions > 0
         ? (_sessionCorrectQuestions / _sessionTotalQuestions) * 100
         : 100.0;
 
     return Container(
       color: const Color(0xFF0F0F1A),
-      padding: const EdgeInsets.only(left: 20.0, top: 125.0, bottom: 32.0, right: 20.0),
+      padding: EdgeInsets.only(left: 20.0, top: MediaQuery.of(context).padding.top + 82.0 + 32.0, bottom: 32.0, right: 20.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -476,7 +511,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- TAB 1: EXPLORE CHANNELS ---
   Widget _buildExploreTab() {
-    // Renders the list of curriculum channels, compiling difficulty tags and slideshow counts dynamically.
+    /// Renders the list of curriculum channels, compiling difficulty tags and slideshow counts dynamically.
     // Extract unique categories dynamically from feed engine lessons
     final List<String> categories = _feedEngine.lessons
         .map((l) => l.category)
@@ -533,7 +568,7 @@ class _FeedScreenState extends State<FeedScreen> {
     }).toList();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 130.0, left: 20.0, right: 20.0, bottom: 20.0),
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 82.0 + 32.0, left: 20.0, right: 20.0, bottom: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -648,7 +683,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- TAB 2: SEARCH CHANNELS ---
   Widget _buildSearchTab() {
-    // Renders a search input field and compiles a list of recommended chapters and trending tags.
+    /// Renders a search input field and compiles a list of recommended chapters and trending tags.
     final List<String> trendingHashtags = [
       '#LoremIpsum',
       '#DolorSit',
@@ -663,7 +698,7 @@ class _FeedScreenState extends State<FeedScreen> {
     ];
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 130.0, left: 20.0, right: 20.0, bottom: 20.0),
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 82.0 + 32.0, left: 20.0, right: 20.0, bottom: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -827,13 +862,13 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- TAB 3: SUMMARY & STATS DASHBOARD (Completions & Interactive Progress Charts) ---
   Widget _buildSummaryTab() {
-    // Builds the personal statistics and gamification dashboard showing overall student accuracy, categories completed, and progress meters.
+    /// Builds the personal statistics and gamification dashboard showing overall student accuracy, categories completed, and progress meters.
     final int overallAccuracy = _overallTotalQuizzes > 0
         ? ((_overallCorrectQuizzes / _overallTotalQuizzes) * 100).round()
         : 100;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 130.0, left: 20.0, right: 20.0, bottom: 20.0),
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 82.0 + 32.0, left: 20.0, right: 20.0, bottom: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -907,6 +942,8 @@ class _FeedScreenState extends State<FeedScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          _buildSavedLessonsButton(),
           const SizedBox(height: 24),
 
           // Topic-Based Completion Progress Bars
@@ -959,10 +996,18 @@ class _FeedScreenState extends State<FeedScreen> {
                   _completedByType.updateAll((key, val) => 0);
                   _overallCorrectQuizzes = 0;
                   _overallTotalQuizzes = 0;
+                  _bookmarkedLessonIds.clear();
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(AppTranslations.translate(widget.languageCode, 'reset_success')),
+                    content: Text(
+                      AppTranslations.translate(widget.languageCode, 'reset_success'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
                     backgroundColor: const Color(0xFF1E1E2F),
                   ),
                 );
@@ -990,7 +1035,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildStatBlock(String title, String value, IconData icon, Color color) {
-    // Helper layout rendering individual metric tiles in the profile/summary dashboard.
+    /// Helper layout rendering individual metric tiles in the profile/summary dashboard.
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
       decoration: BoxDecoration(
@@ -1030,7 +1075,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildStatProgressRow(String label, int completedCount, int targetCount, Color color) {
-    // Renders linear indicator lines charting progress achievements against a predefined lesson cap.
+    /// Renders linear indicator lines charting progress achievements against a predefined lesson cap.
     final double progress = (completedCount / targetCount).clamp(0.0, 1.0);
 
     return Container(
@@ -1084,7 +1129,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- GLOWING BOTTOM NAVIGATION BAR ---
   Widget _buildBottomNavigation() {
-    // Renders the customized navigation footer allowing users to switch between learning views.
+    /// Renders the customized navigation footer allowing users to switch between learning views.
     final items = [
       {'icon': Icons.offline_bolt_outlined, 'activeIcon': Icons.offline_bolt, 'label': AppTranslations.translate(widget.languageCode, 'main')},
       {'icon': Icons.explore_outlined, 'activeIcon': Icons.explore, 'label': AppTranslations.translate(widget.languageCode, 'explore')},
@@ -1163,7 +1208,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildCardTemplate(Lesson lesson) {
-    // Standard template distributor parsing lessons and injecting appropriate UI layouts (MCQ, Swipe, Slides).
+    /// Standard template distributor parsing lessons and injecting appropriate UI layouts (MCQ, Swipe, Slides).
     switch (lesson.type) {
       case LessonType.slides:
         return TemplateSlides(
@@ -1181,5 +1226,225 @@ class _FeedScreenState extends State<FeedScreen> {
           onAnswerSubmitted: (wasCorrect) => _handleAnswerSubmitted(lesson.id, wasCorrect),
         );
     }
+  }
+
+  void _showSavedLessonsBottomSheet() {
+    /// Renders a premium bottom sheet detailing all bookmarked lessons.
+    final savedLessons = _feedEngine.lessons.where((l) => _bookmarkedLessonIds.contains(l.id)).toList();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF16162A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: const EdgeInsets.only(top: 14, left: 20, right: 20, bottom: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppTranslations.translate(widget.languageCode, 'saved_lessons_sheet_title'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white60),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (savedLessons.isEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40.0),
+                      child: Text(
+                        AppTranslations.translate(widget.languageCode, 'no_saved_lessons'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 14,
+                          height: 1.45,
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    Flexible(
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: savedLessons.length,
+                        separatorBuilder: (context, index) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final lesson = savedLessons[index];
+                          
+                          final Color categoryColor;
+                          switch (lesson.category.toLowerCase()) {
+                            case 'topic1':
+                              categoryColor = const Color(0xFFD946EF);
+                              break;
+                            case 'topic2':
+                              categoryColor = const Color(0xFF06B6D4);
+                              break;
+                            case 'topic3':
+                              categoryColor = const Color(0xFF10B981);
+                              break;
+                            default:
+                              categoryColor = const Color(0xFF3B82F6);
+                          }
+
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              setState(() {
+                                final int currentPage = _pageController.hasClients ? _pageController.page?.round() ?? 0 : 0;
+                                final insertIndex = (currentPage + 1).clamp(0, _sessionLessons.length);
+                                _sessionLessons.insert(insertIndex, lesson);
+                                _selectedTabIndex = 0;
+                              });
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (_pageController.hasClients) {
+                                  final int currentPage = _pageController.page?.round() ?? 0;
+                                  _pageController.jumpToPage(currentPage + 1);
+                                }
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E1E2F),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.04),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: categoryColor.withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(color: categoryColor.withOpacity(0.3)),
+                                        ),
+                                        child: Text(
+                                          lesson.category.toUpperCase().replaceAll('TOPIC', 'TOPIC '),
+                                          style: TextStyle(
+                                            color: categoryColor,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _bookmarkedLessonIds.remove(lesson.id);
+                                          });
+                                          setSheetState(() {
+                                            savedLessons.removeAt(index);
+                                          });
+                                        },
+                                        child: const Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.redAccent,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    lesson.title,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  if (lesson.explanation != null && lesson.explanation!.isNotEmpty) ...[
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      lesson.explanation!,
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSavedLessonsButton() {
+    /// Renders a wide glassmorphic button in summary/profile to access saved lessons.
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: _showSavedLessonsBottomSheet,
+        icon: const Icon(Icons.bookmark_outline, color: Color(0xFF3B82F6), size: 20),
+        label: Text(
+          "${AppTranslations.translate(widget.languageCode, 'saved_lessons')} (${_bookmarkedLessonIds.length})",
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF1E1E2F),
+          surfaceTintColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: Colors.white.withOpacity(0.06),
+              width: 1.5,
+            ),
+          ),
+          elevation: 2,
+        ),
+      ),
+    );
   }
 }

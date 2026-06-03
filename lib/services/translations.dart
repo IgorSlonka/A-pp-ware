@@ -1,5 +1,5 @@
-// This file handles application localization and translations.
-// It manages key-value pairings for English and Polish UI components and text fields.
+/// This file handles application localization and translations.
+/// It manages key-value pairings for English and Polish UI components and text fields.
 class AppTranslations {
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
@@ -44,6 +44,12 @@ class AppTranslations {
       'quizzes_label': ' interactive quizzes in this topic.',
       'recommended_chapter': 'Recommended Chapter',
       'recommended_desc': 'Interactive course material matched to your progress.',
+      'saved_lessons': 'Saved Lessons',
+      'no_saved_lessons': 'No saved lessons yet. Save lessons using the bookmark button on the feed!',
+      'saved_lessons_sheet_title': 'Saved Lessons',
+      'bookmark_added': 'Saved to bookmarks!',
+      'bookmark_removed': 'Removed from bookmarks',
+      'link_copied': 'Link copied to clipboard!',
     },
     'pl': {
       'main': 'Główna',
@@ -87,11 +93,17 @@ class AppTranslations {
       'quizzes_label': ' interaktywnymi quizami w tym temacie.',
       'recommended_chapter': 'Zalecany Rozdział',
       'recommended_desc': 'Interaktywny materiał szkoleniowy dopasowany do postępów.',
+      'saved_lessons': 'Zapisane Lekcje',
+      'no_saved_lessons': 'Brak zapisanych lekcji. Zapisuj lekcje za pomocą przycisku zakładki na kanale!',
+      'saved_lessons_sheet_title': 'Zapisane Lekcje',
+      'bookmark_added': 'Zapisano w zakładkach!',
+      'bookmark_removed': 'Usunięto z zakładek',
+      'link_copied': 'Link skopiowany do schowka!',
     }
   };
 
   static String translate(String langCode, String key) {
-    // Looks up and returns the translated text matching the given localization code and lookup key.
+    /// Looks up and returns the translated text matching the given localization code and lookup key.
     return _localizedValues[langCode]?[key] ?? key;
   }
 }

@@ -1,7 +1,7 @@
-// This file defines the core data models for lessons within the application.
-// It includes the LessonType enum representing quiz variations (slides, swipe, MCQ),
-// the Slide class for pagination within slide decks (with optional charts/images),
-// and the main Lesson class encapsulating educational modules and their question details.
+/// This file defines the core data models for lessons within the application.
+/// It includes the LessonType enum representing quiz variations (slides, swipe, MCQ),
+/// the Slide class for pagination within slide decks (with optional charts/images),
+/// and the main Lesson class encapsulating educational modules and their question details.
 enum LessonType {
   slides,
   swipe,
@@ -15,7 +15,7 @@ class Slide {
   final String? imagePath;
 
   Slide({
-    // Constructor defining individual slide content including text, charts, and image paths.
+    /// Constructor defining individual slide content including text, charts, and image paths.
     required this.text,
     this.chartType = 'none',
     this.chartData = const [],
@@ -23,7 +23,7 @@ class Slide {
   });
 
   factory Slide.fromJson(Map<String, dynamic> json) {
-    // Standard factory constructor parsing a Slide instance from a serialized JSON map.
+    /// Standard factory constructor parsing a Slide instance from a serialized JSON map.
     return Slide(
       text: json['text'] as String,
       chartType: json['chartType'] as String? ?? 'none',
@@ -59,7 +59,7 @@ class Lesson {
   final String? explanation;
 
   Lesson({
-    // Constructor representing a complete learning card module (which could be a slide deck, true/false swipe, or MCQ).
+    /// Constructor representing a complete learning card module (which could be a slide deck, true/false swipe, or MCQ).
     required this.id,
     required this.topic,
     required this.category,
@@ -74,7 +74,7 @@ class Lesson {
   });
 
   factory Lesson.fromJson(Map<String, dynamic> json) {
-    // Factory method parsing a generic Lesson container from json content and classifying its type.
+    /// Factory method parsing a generic Lesson container from json content and classifying its type.
     final typeStr = json['type'] as String;
     LessonType type;
     if (typeStr == 'slides') {

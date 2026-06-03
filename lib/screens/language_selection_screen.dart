@@ -1,6 +1,6 @@
-// This file defines the LanguageSelectionScreen widget, which serves as the app's entry screen.
-// It features smooth breathing neon/glow circles, glassmorphic UI panels,
-// and supports language selection (English vs. Polish) with a custom route transition.
+/// This file defines the LanguageSelectionScreen widget, which serves as the app's entry screen.
+/// It features smooth breathing neon/glow circles, glassmorphic UI panels,
+/// and supports language selection (English vs. Polish) with a custom route transition.
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../main.dart';
@@ -8,7 +8,7 @@ import 'feed_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({
-    // Default constructor for LanguageSelectionScreen.
+    /// Default constructor for LanguageSelectionScreen.
     super.key,
   });
 
@@ -23,7 +23,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
 
   @override
   void initState() {
-    // Initializes the animation controllers for background breathing glows and content fade-ins.
+    /// Initializes the animation controllers for background breathing glows and content fade-ins.
     super.initState();
     
     // Smooth breathing glow animation for the backdrop neon circles
@@ -46,19 +46,17 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
 
   @override
   void dispose() {
-    // Standard cleanup of animations to prevent memory leaks.
+    /// Standard cleanup of animations to prevent memory leaks.
     _glowController.dispose();
     _fadeController.dispose();
     super.dispose();
   }
 
   void _selectLanguage(String langCode) {
-    // Saves the language code selection and navigates to the FeedScreen with a custom fade transition.
+    /// Saves the language code selection and navigates to the FeedScreen with a custom fade transition.
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => SmartphonePreviewWrapper(
-          child: FeedScreen(languageCode: langCode),
-        ),
+        pageBuilder: (context, animation, secondaryAnimation) => FeedScreen(languageCode: langCode),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: animation,
@@ -72,7 +70,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
 
   @override
   Widget build(BuildContext context) {
-    // Renders the glowing neon gradient circles and glassmorphic menu selection panel.
+    /// Renders the glowing neon gradient circles and glassmorphic menu selection panel.
     return Scaffold(
       body: Stack(
         children: [
@@ -261,7 +259,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
   }
 
   Widget _buildLanguageButton({
-    // Builds custom glassmorphic selector buttons containing language metadata and localized flag representations.
+    /// Builds custom glassmorphic selector buttons containing language metadata and localized flag representations.
     required String label,
     required String subtitle,
     required String flag,

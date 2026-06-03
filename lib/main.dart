@@ -1,13 +1,13 @@
-// This file is the main entry point for the APPware application.
-// It initializes core Flutter services, configures custom scrolling behaviors,
-// and sets up the root MaterialApp with deep purple styling themes.
-// It also provides a SmartphonePreviewWrapper to mock physical bezels on desktop.
+/// This file is the main entry point for the A(PP)ware application.
+/// It initializes core Flutter services, configures custom scrolling behaviors,
+/// and sets up the root MaterialApp with deep purple styling themes.
+/// It also provides a SmartphonePreviewWrapper to mock physical bezels on desktop.
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'screens/language_selection_screen.dart';
 
 void main() {
-  // Main execution root of the application, ensuring Flutter engine bindings are ready before mounting the app.
+  /// Main execution root of the application, ensuring Flutter engine bindings are ready before mounting the app.
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const EduTikTokApp());
 }
@@ -15,7 +15,7 @@ void main() {
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices {
-    // Configures scroll inputs to support both touch gestures and mouse dragging for testing flexibility.
+    /// Configures scroll inputs to support both touch gestures and mouse dragging for testing flexibility.
     return {
       PointerDeviceKind.touch,
       PointerDeviceKind.mouse,
@@ -25,15 +25,15 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
 class EduTikTokApp extends StatelessWidget {
   const EduTikTokApp({
-    // Root constructor for the application.
+    /// Root constructor for the application.
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Builds the primary MaterialApp shell, specifying routes, dark themes, and device mockup wraps.
+    /// Builds the primary MaterialApp shell, specifying routes, dark themes, and device mockup wraps.
     return MaterialApp(
-      title: 'APPware',
+      title: 'A(PP)ware',
       debugShowCheckedModeBanner: false,
       scrollBehavior: MyCustomScrollBehavior(),
       theme: ThemeData(
@@ -51,7 +51,10 @@ class EduTikTokApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const SmartphonePreviewWrapper(child: LanguageSelectionScreen()),
+      builder: (context, child) {
+        return SmartphonePreviewWrapper(child: child!);
+      },
+      home: const LanguageSelectionScreen(),
     );
   }
 }
@@ -63,14 +66,14 @@ class SmartphonePreviewWrapper extends StatelessWidget {
   final Widget child;
 
   const SmartphonePreviewWrapper({
-    // Instantiates a smartphone layout bounding wrapper.
+    /// Instantiates a smartphone layout bounding wrapper.
     super.key,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Computes layout boundaries to frame the child in a physical mobile viewport simulation on wide screens.
+    /// Computes layout boundaries to frame the child in a physical mobile viewport simulation on wide screens.
     return LayoutBuilder(
       builder: (context, constraints) {
         // If the screen width is larger than a standard smartphone, wrap in a centered mockup frame
@@ -99,7 +102,9 @@ class SmartphonePreviewWrapper extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(30), // Match the inner bezel curves
-                  child: child,
+                  child: ScaffoldMessenger(
+                    child: child,
+                  ),
                 ),
               ),
             ),
@@ -107,7 +112,9 @@ class SmartphonePreviewWrapper extends StatelessWidget {
         }
 
         // Otherwise on normal mobile display or small mobile views, fill the screen
-        return child;
+        return ScaffoldMessenger(
+          child: child,
+        );
       },
     );
   }

@@ -1,6 +1,6 @@
-// This file defines the TemplateSwipe widget, representing True/False swipe quiz cards.
-// It supports gesture recognition (horizontal drags), rotates and translates the card dynamically,
-// blends backgrounds to green (True) or red (False) based on drag direction, and displays explanation sheets.
+/// This file defines the TemplateSwipe widget, representing True/False swipe quiz cards.
+/// It supports gesture recognition (horizontal drags), rotates and translates the card dynamically,
+/// blends backgrounds to green (True) or red (False) based on drag direction, and displays explanation sheets.
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import '../models/lesson_model.dart';
@@ -10,7 +10,7 @@ class TemplateSwipe extends StatefulWidget {
   final Function(bool wasCorrect) onAnswerSubmitted;
 
   const TemplateSwipe({
-    // Constructor instantiating the swiper template, receiving the Lesson data model and answer callbacks.
+    /// Constructor instantiating the swiper template, receiving the Lesson data model and answer callbacks.
     super.key,
     required this.lesson,
     required this.onAnswerSubmitted,
@@ -26,7 +26,7 @@ class _TemplateSwipeState extends State<TemplateSwipe> {
   bool _revealed = false;
 
   Color get _categoryColor {
-    // Getter returning theme coloring associated with lesson category groupings.
+    /// Getter returning theme coloring associated with lesson category groupings.
     switch (widget.lesson.category.toLowerCase()) {
       case 'topic1':
         return const Color(0xFFD946EF);
@@ -40,7 +40,7 @@ class _TemplateSwipeState extends State<TemplateSwipe> {
   }
 
   void _submitAnswer(bool answer) {
-    // Records the user's swiped answer option, triggers completion events, and locks state reviews.
+    /// Records the user's swiped answer option, triggers completion events, and locks state reviews.
     if (_revealed) return;
 
     setState(() {
@@ -54,7 +54,7 @@ class _TemplateSwipeState extends State<TemplateSwipe> {
 
   @override
   Widget build(BuildContext context) {
-    // Renders the viewport containing swipe guides, gesture listeners, translation vectors, and result screens.
+    /// Renders the viewport containing swipe guides, gesture listeners, translation vectors, and result screens.
     final bool isCorrect = _userAnswer == widget.lesson.correctAnswer;
 
     // Calculate rotation and horizontal offset for drag effect
@@ -88,7 +88,7 @@ class _TemplateSwipeState extends State<TemplateSwipe> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 125.0), // Spacer for top HUD
+          SizedBox(height: MediaQuery.of(context).padding.top + 82.0), // Spacer for top HUD
 
           // Category Tag
           Container(
@@ -211,7 +211,7 @@ class _TemplateSwipeState extends State<TemplateSwipe> {
   }
 
   Widget _buildDraggableCard(Color cardColor, double ratio) {
-    // Builds the physical flashcard that the student drags, blending colors and scaling borders dynamically.
+    /// Builds the physical flashcard that the student drags, blending colors and scaling borders dynamically.
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -273,7 +273,7 @@ class _TemplateSwipeState extends State<TemplateSwipe> {
   }
 
   Widget _buildResultView(bool isCorrect) {
-    // Displays feedback widgets indicating if the user's swipe response was correct, alongside Markdown solutions.
+    /// Displays feedback widgets indicating if the user's swipe response was correct, alongside Markdown solutions.
     return Container(
       width: double.infinity,
       height: double.infinity,
