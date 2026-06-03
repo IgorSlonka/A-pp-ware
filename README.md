@@ -10,7 +10,7 @@
 
 
 # Installing Flutter: 
-[text](https://docs.flutter.dev/install/quick)
+[Tutorial](https://docs.flutter.dev/install/quick)
 
 # Start APP:
 > Check if flutter works correctly
