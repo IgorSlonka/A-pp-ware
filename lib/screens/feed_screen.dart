@@ -1,3 +1,7 @@
+// This file defines the FeedScreen widget, representing the main application screen.
+// It integrates a TikTok-like vertical swipe feed with gamification elements like streaks,
+// XP goals, and accuracy stats. It supports multiple tabs (Feed, Explore, Search, Summary)
+// and handles learning sessions populated dynamically from a local database of lessons.
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../services/feed_engine.dart';
@@ -12,7 +16,11 @@ import '../widgets/template_mcq.dart';
 class FeedScreen extends StatefulWidget {
   final String languageCode;
 
-  const FeedScreen({super.key, required this.languageCode});
+  const FeedScreen({
+    // Constructor for the primary FeedScreen, passing the current localization language code.
+    super.key,
+    required this.languageCode,
+  });
 
   @override
   State<FeedScreen> createState() => _FeedScreenState();
@@ -58,17 +66,20 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   void initState() {
+    // Initializes the screen state and triggers lazy loading of lesson resources.
     super.initState();
     _initFeedEngine();
   }
 
   @override
   void dispose() {
+    // Cleans up controllers and hardware listeners to prevent memory leaks.
     _pageController.dispose();
     super.dispose();
   }
 
   Future<void> _initFeedEngine() async {
+    // Connects to the local JSON database via FeedEngine to download relevant curriculum nodes.
     await _feedEngine.loadLessons(widget.languageCode);
     _generateNewSession();
     setState(() {
@@ -79,6 +90,7 @@ class _FeedScreenState extends State<FeedScreen> {
   /// Generates a new lesson segment group of random size 5 to 12.
   /// Resets active session quiz scores.
   void _generateNewSession() {
+    // Generates a random set of 5 to 12 lessons for the current learning round and resets session scores.
     _sessionLessons.clear();
     _sessionTotalQuestions = 0;
     _sessionCorrectQuestions = 0;
@@ -95,6 +107,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Triggered when the user scrolls past the summary card
   void _loadNextSession() {
+    // Resets session context and jumps the PageView index back to the beginning of the slide deck.
     setState(() {
       _generateNewSession();
     });
@@ -103,6 +116,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Instant skip callback (bypass summary, launch next section)
   void _handleSkipSection() {
+    // Skip action that bypasses summary entirely, instantly loading a fresh deck of randomized cards.
     setState(() {
       _generateNewSession();
     });
@@ -119,6 +133,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Called upon MCQ/Swipe quiz submission
   void _handleAnswerSubmitted(String lessonId, bool wasCorrect) {
+    // Processes a submitted user answer (MCQ or Swipe), updates XP, pass states, and validates daily goals.
     _feedEngine.recordReview(lessonId, wasCorrect);
 
     // Fetch the lesson object to pull metadata
@@ -165,6 +180,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Called when the user completes a slide deck
   void _handleSlideCompleted(String lessonId, String category) {
+    // Processes slide review completions, awarding flat XP and updating completed counts.
     _feedEngine.recordReview(lessonId, true);
 
     if (!_interactedLessonIds.contains(lessonId)) {
@@ -193,6 +209,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Standard Flutter build method establishing the global scaffold and floating navigation structures.
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFF0F0F1A),
@@ -236,6 +253,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildActiveTabContent() {
+    // Router utility returning the corresponding tab view content depending on selected bottom navigation index.
     switch (_selectedTabIndex) {
       case 0:
         return _buildMainFeedTab();
@@ -252,6 +270,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- TAB 0: MAIN TIKTOK FEED (Segmented Groups & Transitions) ---
   Widget _buildMainFeedTab() {
+    // Constructs the vertical scrolling PageView representing the main TikTok-style microlearning feed.
     return PageView.builder(
       scrollDirection: Axis.vertical,
       controller: _pageController,
@@ -307,6 +326,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   /// Renders a beautiful completed overview card showing accuracy percentage
   Widget _buildSectionSummaryCard() {
+    // Builds a card overlay summary upon completing a lesson deck, visualizing accuracy and performance scores.
     final double accuracy = _sessionTotalQuestions > 0
         ? (_sessionCorrectQuestions / _sessionTotalQuestions) * 100
         : 100.0;
@@ -456,6 +476,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- TAB 1: EXPLORE CHANNELS ---
   Widget _buildExploreTab() {
+    // Renders the list of curriculum channels, compiling difficulty tags and slideshow counts dynamically.
     // Extract unique categories dynamically from feed engine lessons
     final List<String> categories = _feedEngine.lessons
         .map((l) => l.category)
@@ -627,6 +648,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- TAB 2: SEARCH CHANNELS ---
   Widget _buildSearchTab() {
+    // Renders a search input field and compiles a list of recommended chapters and trending tags.
     final List<String> trendingHashtags = [
       '#LoremIpsum',
       '#DolorSit',
@@ -805,6 +827,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- TAB 3: SUMMARY & STATS DASHBOARD (Completions & Interactive Progress Charts) ---
   Widget _buildSummaryTab() {
+    // Builds the personal statistics and gamification dashboard showing overall student accuracy, categories completed, and progress meters.
     final int overallAccuracy = _overallTotalQuizzes > 0
         ? ((_overallCorrectQuizzes / _overallTotalQuizzes) * 100).round()
         : 100;
@@ -967,6 +990,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildStatBlock(String title, String value, IconData icon, Color color) {
+    // Helper layout rendering individual metric tiles in the profile/summary dashboard.
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
       decoration: BoxDecoration(
@@ -1006,6 +1030,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildStatProgressRow(String label, int completedCount, int targetCount, Color color) {
+    // Renders linear indicator lines charting progress achievements against a predefined lesson cap.
     final double progress = (completedCount / targetCount).clamp(0.0, 1.0);
 
     return Container(
@@ -1059,6 +1084,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- GLOWING BOTTOM NAVIGATION BAR ---
   Widget _buildBottomNavigation() {
+    // Renders the customized navigation footer allowing users to switch between learning views.
     final items = [
       {'icon': Icons.offline_bolt_outlined, 'activeIcon': Icons.offline_bolt, 'label': AppTranslations.translate(widget.languageCode, 'main')},
       {'icon': Icons.explore_outlined, 'activeIcon': Icons.explore, 'label': AppTranslations.translate(widget.languageCode, 'explore')},
@@ -1137,6 +1163,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildCardTemplate(Lesson lesson) {
+    // Standard template distributor parsing lessons and injecting appropriate UI layouts (MCQ, Swipe, Slides).
     switch (lesson.type) {
       case LessonType.slides:
         return TemplateSlides(

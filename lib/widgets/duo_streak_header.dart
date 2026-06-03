@@ -1,3 +1,6 @@
+// This file defines the DuoStreakHeader widget, representing the top gamified dashboard banner.
+// It displays the current daily streak (flame indicator), overall application title,
+// navigation profile button, and a gradient progress bar tracking XP milestones.
 import 'dart:math';
 import 'package:flutter/material.dart';
 
@@ -8,6 +11,7 @@ class DuoStreakHeader extends StatelessWidget {
   final VoidCallback onProfilePressed;
 
   const DuoStreakHeader({
+    // Constructor instantiating a top dashboard stats display widget.
     super.key,
     required this.streak,
     required this.currentXp,
@@ -17,6 +21,7 @@ class DuoStreakHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Computes layout dimensions to render progress tracks, flame icons, and branding titles.
     final double progress = min(1.0, currentXp / xpGoal);
 
     return Container(

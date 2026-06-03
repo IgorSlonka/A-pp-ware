@@ -1,3 +1,5 @@
+// This file handles application localization and translations.
+// It manages key-value pairings for English and Polish UI components and text fields.
 class AppTranslations {
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
@@ -89,6 +91,7 @@ class AppTranslations {
   };
 
   static String translate(String langCode, String key) {
+    // Looks up and returns the translated text matching the given localization code and lookup key.
     return _localizedValues[langCode]?[key] ?? key;
   }
 }

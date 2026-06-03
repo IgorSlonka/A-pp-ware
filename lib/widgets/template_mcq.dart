@@ -1,3 +1,6 @@
+// This file defines the TemplateMcq widget, representing multiple-choice questions (MCQs).
+// It displays a markdown question prompt, list selectors for answers, color-coded feedback
+// (green for correct, red for incorrect), and a detailed explanation reveal card upon answering.
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import '../models/lesson_model.dart';
@@ -7,6 +10,7 @@ class TemplateMcq extends StatefulWidget {
   final Function(bool wasCorrect) onAnswerSubmitted;
 
   const TemplateMcq({
+    // Constructor instantiating the MCQ template, receiving a Lesson data model and answer callbacks.
     super.key,
     required this.lesson,
     required this.onAnswerSubmitted,
@@ -21,6 +25,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
   bool _revealed = false;
 
   Color get _categoryColor {
+    // Dynamic color picker matching categories to brand tokens (Fuchsia, Cyan, Emerald).
     switch (widget.lesson.category.toLowerCase()) {
       case 'topic1':
         return const Color(0xFFD946EF);
@@ -34,6 +39,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
   }
 
   void _submitAnswer(int index) {
+    // Handles option selection actions, triggers parent review logging, and reveals correction feedback.
     if (_revealed) return;
 
     setState(() {
@@ -47,6 +53,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
 
   @override
   Widget build(BuildContext context) {
+    // Renders the MCQ viewport containing categories, markdown questions, options list, and explanation boxes.
     final options = widget.lesson.options ?? [];
 
     final categoryColor = _categoryColor;
@@ -92,7 +99,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
           // Question container box
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.only(left: 16.0, top: 16.0, bottom: 16.0, right: 68.0),
+            padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
               color: const Color(0xFF1A1A2E),
               borderRadius: BorderRadius.circular(16),
@@ -153,6 +160,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
   }
 
   Widget _buildOptionButton(int index, String optionText) {
+    // Renders individual interactive option buttons, coloring border highlights green/red after a selection is locked in.
     Color borderColor = Colors.white.withOpacity(0.1);
     Color fillColor = const Color(0xFF1E1E2F);
     Widget? trailingIcon;
@@ -181,7 +189,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
     return GestureDetector(
       onTap: () => _submitAnswer(index),
       child: Container(
-        padding: const EdgeInsets.only(left: 16.0, top: 16.0, bottom: 16.0, right: 68.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         decoration: BoxDecoration(
           color: fillColor,
           borderRadius: BorderRadius.circular(14),
@@ -212,6 +220,7 @@ class _TemplateMcqState extends State<TemplateMcq> {
   }
 
   Widget _buildExplanationBox() {
+    // Renders a bottom panel explaining the correct choice in detail using markdown.
     final bool wasCorrect = _selectedOptionIndex == widget.lesson.correctOptionIndex;
 
     return Container(
