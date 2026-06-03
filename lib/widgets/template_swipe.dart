@@ -206,7 +206,7 @@ class _TemplateSwipeState extends State<TemplateSwipe> {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      padding: const EdgeInsets.only(left: 24.0, top: 24.0, bottom: 24.0, right: 76.0),
+      padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
         color: cardColor, // Dynamically color-blended card background!
         borderRadius: BorderRadius.circular(20),
@@ -267,7 +267,7 @@ class _TemplateSwipeState extends State<TemplateSwipe> {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      padding: const EdgeInsets.only(left: 24.0, top: 24.0, bottom: 24.0, right: 76.0),
+      padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E2F),
         borderRadius: BorderRadius.circular(20),

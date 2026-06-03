@@ -302,34 +302,39 @@ class _TemplateSlidesState extends State<TemplateSlides> {
           const SizedBox(height: 16),
 
           // Horizontal Progress Indicator Bar (Slide 1 of 3, etc.)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Slide ${_activePageIndex + 1} of ${slides.length}",
-                style: const TextStyle(
-                  color: Colors.white38,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Row(
-                children: List.generate(
-                  slides.length,
-                  (index) => Container(
-                    width: index == _activePageIndex ? 20 : 8,
-                    height: 8,
-                    margin: const EdgeInsets.only(left: 6),
-                    decoration: BoxDecoration(
-                      color: index == _activePageIndex
-                          ? categoryColor
-                          : Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(4),
+          // Centered slide dots and count indicator spanning the entire width underneath the card
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    slides.length,
+                    (index) => Container(
+                      width: index == _activePageIndex ? 20 : 8,
+                      height: 8,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: index == _activePageIndex
+                            ? categoryColor
+                            : Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Text(
+                  "Slide ${_activePageIndex + 1} of ${slides.length}",
+                  style: const TextStyle(
+                    color: Colors.white38,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
         ],

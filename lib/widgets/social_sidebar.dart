@@ -33,7 +33,7 @@ class _SocialSidebarState extends State<SocialSidebar> {
           backgroundColor: const Color(0xFF1E1E2F),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.0),
-            side: BorderBorderSide(),
+            side: BorderSide(color: Colors.white.withOpacity(0.12), width: 1.5),
           ),
           title: Row(
             children: [
@@ -41,18 +41,21 @@ class _SocialSidebarState extends State<SocialSidebar> {
                 "💡 ",
                 style: TextStyle(fontSize: 22),
               ),
-              Text(
-                "${widget.topic} Explanation",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+              Expanded(
+                child: Text(
+                  "${widget.topic} Explanation",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
           content: Text(
-            widget.explanation ?? "Lorem ipsum explanation placeholder. Learn more daily!",
+            widget.explanation ?? "Explanation placeholder text. Learn more daily!",
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
@@ -76,112 +79,161 @@ class _SocialSidebarState extends State<SocialSidebar> {
     );
   }
 
-  BorderSide BorderBorderSide() {
-    return BorderSide(color: Colors.white.withOpacity(0.12), width: 1.5);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final showLearnOption = widget.explanation != null;
+
     return Padding(
-      padding: const EdgeInsets.only(right: 12.0, bottom: 20.0),
+      padding: const EdgeInsets.only(right: 16.0, bottom: 24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Bookmark Button
-          _buildSidebarButton(
-            icon: _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-            color: _isBookmarked ? Colors.amber : Colors.white,
-            label: _isBookmarked ? "Saved" : "Save",
-            onTap: _toggleBookmark,
-          ),
-          const SizedBox(height: 18),
-
-          // Explanation / Study Guide Info Button
-          if (widget.explanation != null) ...[
-            _buildSidebarButton(
-              icon: Icons.lightbulb_outline,
-              color: Colors.greenAccent,
-              label: "Learn",
-              onTap: () => _showExplanationDialog(context),
-            ),
-            const SizedBox(height: 18),
-          ],
-
-          // Share Button
-          _buildSidebarButton(
-            icon: Icons.share,
-            color: Colors.white,
-            label: "Share",
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Link copied to clipboard!"),
-                  duration: Duration(seconds: 1),
-                  backgroundColor: Color(0xFF1E1E2F),
+          Theme(
+            data: Theme.of(context).copyWith(
+              cardColor: const Color(0xFF1E1E2F),
+              popupMenuTheme: PopupMenuThemeData(
+                color: const Color(0xFF1E1E2F),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: Colors.white.withOpacity(0.12),
+                    width: 1,
+                  ),
                 ),
-              );
-            },
-          ),
-          const SizedBox(height: 18),
-
-          // Skip Button
-          _buildSidebarButton(
-            icon: Icons.fast_forward,
-            color: Colors.amberAccent,
-            label: "Skip",
-            onTap: () {
-              if (widget.onSkipSectionPressed != null) {
-                widget.onSkipSectionPressed!();
-              }
-            },
+                elevation: 8,
+              ),
+            ),
+            child: PopupMenuButton<String>(
+              offset: const Offset(0, -225), // Shorter y-offset to lift the menu upwards (opens above the button)
+              icon: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(0.4),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.15),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.more_vert, // Vertical triple-dot menu
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              onSelected: (value) {
+                switch (value) {
+                  case 'save':
+                    _toggleBookmark();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(_isBookmarked ? "Removed from bookmarks" : "Saved to bookmarks!"),
+                        duration: const Duration(seconds: 1),
+                        backgroundColor: const Color(0xFF1E1E2F),
+                      ),
+                    );
+                    break;
+                  case 'learn':
+                    _showExplanationDialog(context);
+                    break;
+                  case 'share':
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Link copied to clipboard!"),
+                        duration: Duration(seconds: 1),
+                        backgroundColor: Color(0xFF1E1E2F),
+                      ),
+                    );
+                    break;
+                  case 'skip':
+                    if (widget.onSkipSectionPressed != null) {
+                      widget.onSkipSectionPressed!();
+                    }
+                    break;
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'save',
+                  child: Row(
+                    children: [
+                      Icon(
+                        _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                        color: _isBookmarked ? Colors.amber : Colors.white70,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _isBookmarked ? "Saved" : "Save",
+                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'learn',
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.lightbulb_outline,
+                        color: Colors.greenAccent,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        "Learn",
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'share',
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.share,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        "Share",
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(height: 1),
+                PopupMenuItem<String>(
+                  value: 'skip',
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.fast_forward,
+                        color: Colors.amberAccent,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        "Skip",
+                        style: TextStyle(color: Colors.amberAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSidebarButton({
-    required IconData icon,
-    required Color color,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Opacity(
-        opacity: 0.35, // Premium subtle transparency overlay to blend naturally with card backgrounds
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.black.withOpacity(0.2), // highly transparent dark background
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.06), // micro-thin faint border
-                  width: 1,
-                ),
-              ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 24,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white60, // slightly more transparent text labels
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -31,43 +31,6 @@ class Slide {
   }
 }
 
-class SpacedRepetitionState {
-  final int intervalDays;
-  final double easeFactor;
-  final int repetitionCount;
-  final DateTime nextDueDate;
-
-  SpacedRepetitionState({
-    required this.intervalDays,
-    required this.easeFactor,
-    required this.repetitionCount,
-    required this.nextDueDate,
-  });
-
-  factory SpacedRepetitionState.initial() {
-    return SpacedRepetitionState(
-      intervalDays: 1,
-      easeFactor: 2.5,
-      repetitionCount: 0,
-      nextDueDate: DateTime.now(),
-    );
-  }
-
-  SpacedRepetitionState copyWith({
-    int? intervalDays,
-    double? easeFactor,
-    int? repetitionCount,
-    DateTime? nextDueDate,
-  }) {
-    return SpacedRepetitionState(
-      intervalDays: intervalDays ?? this.intervalDays,
-      easeFactor: easeFactor ?? this.easeFactor,
-      repetitionCount: repetitionCount ?? this.repetitionCount,
-      nextDueDate: nextDueDate ?? this.nextDueDate,
-    );
-  }
-}
-
 class Lesson {
   final String id;
   final String topic;
@@ -89,9 +52,6 @@ class Lesson {
   // Shared Quiz features
   final String? explanation;
 
-  // Spaced Repetition State Placeholder
-  SpacedRepetitionState srState;
-
   Lesson({
     required this.id,
     required this.topic,
@@ -104,7 +64,6 @@ class Lesson {
     this.options,
     this.correctOptionIndex,
     this.explanation,
-    required this.srState,
   });
 
   factory Lesson.fromJson(Map<String, dynamic> json) {
@@ -138,7 +97,6 @@ class Lesson {
           : null,
       correctOptionIndex: json['correctOptionIndex'] as int?,
       explanation: json['explanation'] as String?,
-      srState: SpacedRepetitionState.initial(),
     );
   }
 }
