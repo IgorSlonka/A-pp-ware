@@ -4,9 +4,11 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/services.dart';
 import '../models/lesson_model.dart';
+import '../marcin_srs_klasa/review_card_class.dart';
 
 class FeedEngine {
   List<Lesson> _lessons = [];
+  List<reviewCard> _reviewCards = [];
   final Random _random = Random();
 
   List<Lesson> get lessons => _lessons;
@@ -27,6 +29,22 @@ class FeedEngine {
     }
   }
 
+  /// Loads reviewCards from assets/data/review_cards.json
+  Future<void> loadReviewCards() async {
+    try {
+      final jsonString = await rootBundle.loadString('assets/data/review_cards.json');
+      final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
+      _reviewCards = jsonList.map((item) => reviewCard.fromJson(item as Map<String, dynamic>)).toList();
+      print("SUCCESSFULLY LOADED ${_reviewCards.length}");
+    } catch (e, stack) {
+      print("ERROR LOADING REVIEW CARDS");
+      print(stack);
+    }
+  }
+  /// Saves reviewCards
+  Future<void> saveReviewCards() async {
+    ///
+  }
   /// Active method: returns a lesson selected randomly (RNG) from the loaded pool
   Lesson getNextLesson() {
     /// Selects and returns a random lesson from the available pool.
@@ -38,17 +56,49 @@ class FeedEngine {
     return _lessons[index];
   }
 
-  /// STUB PLACEHOLDER: Fallback to random selection from json
+
   Lesson getNextLessonSpacedRepetition() {
-    /// Stub implementation returning a random lesson as a fallback for spaced repetition algorithms.
+    final now = DateTime.now();
+
+    ///Picks cards whose nextReview is due
+    final dueCards = _reviewCards.where(
+      (card) => card.nextReview.isBefore(now),
+    ).toList();
+
+    if(dueCards.isNotEmpty){
+      ///Sorts with respect to nextReview
+      dueCards.sort(
+        (a,b) => a.nextReview.compareTo(b.nextReview),
+      );
+
+      ///Return the lesson corresponding to the id of the first due card
+      final nextCard = dueCards.first;
+      return lessons.firstWhere(
+        (lesson) => lesson.id == nextCard.id,
+      );
+    }
     return getNextLesson();
   }
 
   /// Hook to record card reviews (User answered True/False or MCQ)
-  /// Simplified placeholder function
   void recordReview(String lessonId, bool wasCorrect) {
-    /// Records user performance feedback to guide spaced repetition engines (currently placeholder logger).
-    print("REVIEW RECORDED: Card $lessonId (Correct: $wasCorrect). Spaced repetition is disabled, using fallback random selection.");
+    /// Records user performance feedback to guide spaced repetition engines.
+    ///Pick card correspoding to lesson ID
+    final card = _reviewCards.firstWhere(
+        (c) => c.id == lessonId,
+    );
+    final now = DateTime.now();
+    ///increment repetitions on correct answer, set repetitions to 0 on wrong answer
+    if(wasCorrect){
+      card.repetitions ++;
+
+    } else{
+      card.repetitions = 0;
+    }
+    ///Udpate nextReview variable based on the switch case of repetitions inside getInterval() in the reviewCard class definition
+    card.nextReview = now.add(card.getInterval());
+
+    saveReviewCards();
   }
 
   /// Provides hardcoded data in case asset loader encounters issues in simple runners

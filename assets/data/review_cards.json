@@ -1,0 +1,26 @@
+[
+    {
+        "id" : "Quiz 1.1",
+        "repetitions" : 0,
+        "lastReview" : "2026-06-10T12:00:00Z",
+        "nextReview" : "2026-06-10T12:00:00Z"
+    },
+    {
+        "id" : "Quiz 1.2",
+        "repetitions" : 0,
+        "lastReview" : "2026-06-10T12:00:00Z",
+        "nextReview" : "2026-06-10T12:00:00Z"
+    },
+    {
+        "id" : "Quiz 2",
+        "repetitions" : 0,
+        "lastReview" : "2026-06-10T12:00:00Z",
+        "nextReview" : "2026-06-10T12:00:00Z"
+    },
+    {
+        "id" : "Quiz 3.1",
+        "repetitions" : 0,
+        "lastReview" : "2026-06-10T12:00:00Z",
+        "nextReview" : "2026-06-10T12:00:00Z"
+    }
+]
