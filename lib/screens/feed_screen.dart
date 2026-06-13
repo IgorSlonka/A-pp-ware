@@ -2,8 +2,12 @@
 /// It integrates a TikTok-like vertical swipe feed with gamification elements like streaks,
 /// XP goals, and accuracy stats. It supports multiple tabs (Feed, Explore, Search, Summary)
 /// and handles learning sessions populated dynamically from a local database of lessons.
+import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../services/analytics_service.dart';
 import '../services/feed_engine.dart';
 import '../services/translations.dart';
 import '../models/lesson_model.dart';
@@ -13,13 +17,39 @@ import '../widgets/template_slides.dart';
 import '../widgets/template_swipe.dart';
 import '../widgets/template_mcq.dart';
 
+class _SummaryData {
+  final int totalQuizzes;
+  final int correctQuizzes;
+  final int totalLessons;
+  final int xp;
+  final int streak;
+  final Map<String, int> topicCounts;
+  final Map<String, int> typeCounts;
+  final List<Map<String, dynamic>> recentActivities;
+
+  _SummaryData({
+    required this.totalQuizzes,
+    required this.correctQuizzes,
+    required this.totalLessons,
+    required this.xp,
+    required this.streak,
+    required this.topicCounts,
+    required this.typeCounts,
+    required this.recentActivities,
+  });
+}
+
 class FeedScreen extends StatefulWidget {
   final String languageCode;
+  final String loggedInUser;
+  final String loggedInPassword;
 
   const FeedScreen({
     /// Constructor for the primary FeedScreen, passing the current localization language code.
     super.key,
     required this.languageCode,
+    required this.loggedInUser,
+    required this.loggedInPassword,
   });
 
   @override
@@ -28,8 +58,10 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   final FeedEngine _feedEngine = FeedEngine();
+  final AnalyticsService _analyticsService = AnalyticsService();
   final PageController _pageController = PageController();
   final List<Lesson> _sessionLessons = [];
+  late Future<_SummaryData> _summaryFuture;
   bool _isLoading = true;
 
   // Bottom Navigation Tab Index
@@ -46,13 +78,16 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // Interactive Trackers (Count only upon user engagement)
   final Set<String> _interactedLessonIds = {};
+  // ignore: unused_field
   int _cardsReviewed = 0;
 
   // Bookmarked Lesson IDs
   final Set<String> _bookmarkedLessonIds = {};
 
   // Overall Quiz Performance (Overall Accuracy calculation)
+  // ignore: unused_field
   int _overallTotalQuizzes = 0;
+  // ignore: unused_field
   int _overallCorrectQuizzes = 0;
 
   // Topic & Type Completions for interactive stats charts
@@ -71,7 +106,118 @@ class _FeedScreenState extends State<FeedScreen> {
   void initState() {
     /// Initializes the screen state and triggers lazy loading of lesson resources.
     super.initState();
-    _initFeedEngine();
+    _initializeState();
+  }
+
+  Future<void> _initializeState() async {
+    await _loadPersistedUserState();
+    if (!mounted) return;
+    setState(() {
+      _summaryFuture = _fetchSummaryData();
+    });
+    await _initFeedEngine();
+  }
+
+  Future<void> _loadPersistedUserState() async {
+    final userState = await _analyticsService.fetchUserState(
+      login: widget.loggedInUser,
+      password: widget.loggedInPassword,
+    );
+    final xp = userState['xp'] as int? ?? _currentXp;
+    final streak = userState['streak'] as int? ?? _streak;
+    if (!mounted) return;
+    setState(() {
+      _currentXp = xp;
+      _streak = streak;
+    });
+  }
+
+  Future<_SummaryData> _fetchSummaryData() async {
+    final quizzes = await _analyticsService.fetchQuizEntries(
+      login: widget.loggedInUser,
+      password: widget.loggedInPassword,
+    );
+    final lessons = await _analyticsService.fetchLessonEntries(
+      login: widget.loggedInUser,
+      password: widget.loggedInPassword,
+    );
+    final userState = await _analyticsService.fetchUserState(
+      login: widget.loggedInUser,
+      password: widget.loggedInPassword,
+    );
+
+    final topicCounts = <String, int>{};
+    final typeCounts = <String, int>{};
+    int correctQuizzes = 0;
+    final xp = userState['xp'] as int? ?? 0;
+    final streak = userState['streak'] as int? ?? 0;
+    if (mounted) {
+      setState(() {
+        _currentXp = xp;
+        _streak = streak;
+      });
+    }
+
+    DateTime _parseTimestamp(dynamic timestamp) {
+      if (timestamp is Timestamp) {
+        return timestamp.toDate();
+      }
+      if (timestamp is DateTime) {
+        return timestamp;
+      }
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+
+    for (final quiz in quizzes) {
+      if (quiz['wasCorrect'] == true) {
+        correctQuizzes++;
+      }
+      final category = (quiz['category'] as String?)?.toLowerCase() ?? 'unknown';
+      final lessonType = (quiz['lessonType'] as String?)?.toLowerCase() ?? 'unknown';
+      topicCounts[category] = (topicCounts[category] ?? 0) + 1;
+      typeCounts[lessonType] = (typeCounts[lessonType] ?? 0) + 1;
+    }
+
+    for (final lesson in lessons) {
+      final category = (lesson['category'] as String?)?.toLowerCase() ?? 'unknown';
+      final lessonType = (lesson['lessonType'] as String?)?.toLowerCase() ?? 'unknown';
+      topicCounts[category] = (topicCounts[category] ?? 0) + 1;
+      typeCounts[lessonType] = (typeCounts[lessonType] ?? 0) + 1;
+    }
+
+    final recentActivities = <Map<String, dynamic>>[];
+    recentActivities.addAll(quizzes.map((quiz) {
+      final timestamp = _parseTimestamp(quiz['completedAt']);
+      return {
+        'label': '${AppTranslations.translate(widget.languageCode, 'quiz')} ${quiz['title'] ?? quiz['lessonId']}',
+        'detail': AppTranslations.translate(widget.languageCode, quiz['wasCorrect'] == true ? 'correct' : 'incorrect'),
+        'when': timestamp,
+        'color': quiz['wasCorrect'] == true ? const Color(0xFF10B981) : const Color(0xFFF97316),
+      };
+    }));
+    recentActivities.addAll(lessons.map((lesson) {
+      final timestamp = _parseTimestamp(lesson['completedAt']);
+      final lessonTypeLabel = _displayTypeLabel(lesson['lessonType']?.toLowerCase() ?? 'slides');
+      return {
+        'label': '${lessonTypeLabel}: ${lesson['title'] ?? lesson['lessonId']}',
+        'detail': AppTranslations.translate(widget.languageCode, 'completed'),
+        'when': timestamp,
+        'color': const Color(0xFF3B82F6),
+      };
+    }));
+
+    recentActivities.sort((a, b) => (b['when'] as DateTime).compareTo(a['when'] as DateTime));
+
+    return _SummaryData(
+      totalQuizzes: quizzes.length,
+      correctQuizzes: correctQuizzes,
+      totalLessons: lessons.length,
+      xp: xp,
+      streak: streak,
+      topicCounts: topicCounts,
+      typeCounts: typeCounts,
+      recentActivities: recentActivities.take(6).toList(),
+    );
   }
 
   @override
@@ -146,8 +292,17 @@ class _FeedScreenState extends State<FeedScreen> {
     /// Processes a submitted user answer (MCQ or Swipe), updates XP, pass states, and validates daily goals.
     _feedEngine.recordReview(lessonId, wasCorrect);
 
-    // Fetch the lesson object to pull metadata
-    final lesson = _feedEngine.lessons.firstWhere((l) => l.id == lessonId);
+    // Fetch the lesson object from session (safe fallback to empty defaults)
+    final lesson = _sessionLessons.firstWhere(
+      (l) => l.id == lessonId,
+      orElse: () => Lesson(
+        id: lessonId,
+        topic: 'unknown',
+        category: 'unknown',
+        type: LessonType.mcq,
+        title: 'Unknown Lesson',
+      ),
+    );
     final category = lesson.category;
     final typeStr = lesson.type == LessonType.mcq ? 'mcq' : 'swipe';
 
@@ -193,6 +348,34 @@ class _FeedScreenState extends State<FeedScreen> {
         _currentXp = (_currentXp - 5 < 0) ? 0 : _currentXp - 5;
       }
     });
+
+    unawaited(_analyticsService.saveUserState(
+      login: widget.loggedInUser,
+      password: widget.loggedInPassword,
+      xp: _currentXp,
+      streak: _streak,
+    ));
+
+    // Log to analytics (with safety check for lesson)
+    try {
+      final lessonFromSession = _sessionLessons.firstWhere((l) => l.id == lessonId);
+      unawaited(_analyticsService.logQuizResult(
+        login: widget.loggedInUser,
+        password: widget.loggedInPassword,
+        lessonId: lessonFromSession.id,
+        topic: lessonFromSession.topic,
+        category: category,
+        lessonType: typeStr,
+        title: lessonFromSession.title,
+        wasCorrect: wasCorrect,
+        languageCode: widget.languageCode,
+        completedAt: DateTime.now(),
+      ));
+    } catch (e) {
+      // Lesson not found in session, skip logging
+      // ignore: avoid_print
+      print('⚠️ Could not find lesson $lessonId in session for logging');
+    }
   }
 
   /// Called when the user completes a slide deck
@@ -228,6 +411,33 @@ class _FeedScreenState extends State<FeedScreen> {
           );
         }
       });
+
+      unawaited(_analyticsService.saveUserState(
+        login: widget.loggedInUser,
+        password: widget.loggedInPassword,
+        xp: _currentXp,
+        streak: _streak,
+      ));
+    }
+
+    // Log to analytics (with safety check for lesson)
+    try {
+      final lessonFromSession = _sessionLessons.firstWhere((l) => l.id == lessonId);
+      unawaited(_analyticsService.logLessonCompletion(
+        login: widget.loggedInUser,
+        password: widget.loggedInPassword,
+        lessonId: lessonFromSession.id,
+        topic: lessonFromSession.topic,
+        category: lessonFromSession.category,
+        lessonType: lessonFromSession.type.name,
+        title: lessonFromSession.title,
+        languageCode: widget.languageCode,
+        completedAt: DateTime.now(),
+      ));
+    } catch (e) {
+      // Lesson not found in session, skip logging
+      // ignore: avoid_print
+      print('⚠️ Could not find lesson $lessonId in session for logging');
     }
   }
 
@@ -862,175 +1072,278 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // --- TAB 3: SUMMARY & STATS DASHBOARD (Completions & Interactive Progress Charts) ---
   Widget _buildSummaryTab() {
-    /// Builds the personal statistics and gamification dashboard showing overall student accuracy, categories completed, and progress meters.
-    final int overallAccuracy = _overallTotalQuizzes > 0
-        ? ((_overallCorrectQuizzes / _overallTotalQuizzes) * 100).round()
-        : 100;
+    return FutureBuilder<_SummaryData>(
+      future: _summaryFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
+            ),
+          );
+        }
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 82.0 + 32.0, left: 20.0, right: 20.0, bottom: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Profile
-          Row(
+        if (snapshot.hasError || !snapshot.hasData) {
+          return Center(
+            child: Text(
+              AppTranslations.translate(widget.languageCode, 'summary_loading_error'),
+              style: const TextStyle(color: Colors.white70),
+            ),
+          );
+        }
+
+        final summary = snapshot.data!;
+        final overallAccuracy = summary.totalQuizzes > 0
+            ? ((summary.correctQuizzes / summary.totalQuizzes) * 100).round()
+            : 100;
+        final topicProgress = summary.topicCounts.entries.toList();
+        final typeProgress = summary.typeCounts.entries.toList();
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 82.0 + 32.0, left: 20.0, right: 20.0, bottom: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF3B82F6), width: 2),
-                ),
-                child: const CircleAvatar(
-                  backgroundColor: Color(0xFF1E1E2F),
-                  child: Icon(Icons.person, color: Color(0xFF3B82F6), size: 30),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // Header Profile
+              Row(
                 children: [
-                  Text(
-                    AppTranslations.translate(widget.languageCode, 'learner_title'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFF3B82F6), width: 2),
+                    ),
+                    child: const CircleAvatar(
+                      backgroundColor: Color(0xFF1E1E2F),
+                      child: Icon(Icons.person, color: Color(0xFF3B82F6), size: 30),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    AppTranslations.translate(widget.languageCode, 'member_since'),
-                    style: const TextStyle(color: Colors.white30, fontSize: 11),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppTranslations.translate(widget.languageCode, 'learner_title'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        AppTranslations.translate(widget.languageCode, 'member_since'),
+                        style: const TextStyle(color: Colors.white30, fontSize: 11),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-          // Dynamic Stats Row (Cards Reviewed & Quiz Accuracy)
-          Text(
-            AppTranslations.translate(widget.languageCode, 'performance_summary'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatBlock(
-                  AppTranslations.translate(widget.languageCode, 'cards_reviewed'),
-                  "$_cardsReviewed",
-                  Icons.menu_book,
-                  const Color(0xFF3B82F6),
+              Text(
+                AppTranslations.translate(widget.languageCode, 'performance_summary'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatBlock(
-                  AppTranslations.translate(widget.languageCode, 'quiz_accuracy'),
-                  "$overallAccuracy%",
-                  Icons.track_changes,
-                  const Color(0xFF58CC02),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildSavedLessonsButton(),
-          const SizedBox(height: 24),
+              const SizedBox(height: 12),
 
-          // Topic-Based Completion Progress Bars
-          Text(
-            AppTranslations.translate(widget.languageCode, 'completions_topic'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildStatProgressRow(AppTranslations.translate(widget.languageCode, 'topic1'), _completedByTopic['topic1'] ?? 0, 10, const Color(0xFFD946EF)),
-          const SizedBox(height: 12),
-          _buildStatProgressRow(AppTranslations.translate(widget.languageCode, 'topic2'), _completedByTopic['topic2'] ?? 0, 10, const Color(0xFF06B6D4)),
-          const SizedBox(height: 12),
-          _buildStatProgressRow(AppTranslations.translate(widget.languageCode, 'topic3'), _completedByTopic['topic3'] ?? 0, 10, const Color(0xFF10B981)),
-          
-          const SizedBox(height: 24),
-
-          // Question Type Completion Progress Bars
-          Text(
-            AppTranslations.translate(widget.languageCode, 'completions_type'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildStatProgressRow(AppTranslations.translate(widget.languageCode, 'slideshow'), _completedByType['slides'] ?? 0, 10, const Color(0xFF3B82F6)),
-          const SizedBox(height: 12),
-          _buildStatProgressRow(AppTranslations.translate(widget.languageCode, 'swipe'), _completedByType['swipe'] ?? 0, 10, const Color(0xFF58CC02)),
-          const SizedBox(height: 12),
-          _buildStatProgressRow(AppTranslations.translate(widget.languageCode, 'mcq'), _completedByType['mcq'] ?? 0, 10, Colors.amberAccent),
-
-          const SizedBox(height: 32),
-
-          // Reset Statistics Button
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                setState(() {
-                  _streak = 5;
-                  _currentXp = 45;
-                  _cardsReviewed = 0;
-                  _interactedLessonIds.clear();
-                  _completedByTopic.updateAll((key, val) => 0);
-                  _completedByType.updateAll((key, val) => 0);
-                  _overallCorrectQuizzes = 0;
-                  _overallTotalQuizzes = 0;
-                  _bookmarkedLessonIds.clear();
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      AppTranslations.translate(widget.languageCode, 'reset_success'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatBlock(
+                      AppTranslations.translate(widget.languageCode, 'completed_quizzes'),
+                      '${summary.totalQuizzes}',
+                      Icons.track_changes,
+                      const Color(0xFF58CC02),
                     ),
-                    backgroundColor: const Color(0xFF1E1E2F),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatBlock(
+                      AppTranslations.translate(widget.languageCode, 'completed_lessons'),
+                      '${summary.totalLessons}',
+                      Icons.menu_book,
+                      const Color(0xFF3B82F6),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildSavedLessonsButton(),
+              const SizedBox(height: 24),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatBlock(
+                      AppTranslations.translate(widget.languageCode, 'current_xp'),
+                      '${summary.xp}',
+                      Icons.flash_on,
+                      const Color(0xFFF59E0B),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatBlock(
+                      AppTranslations.translate(widget.languageCode, 'current_streak'),
+                      '${summary.streak}',
+                      Icons.local_fire_department,
+                      const Color(0xFFEF4444),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              Text(
+                AppTranslations.translate(widget.languageCode, 'quiz_accuracy'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildStatProgressRow(
+                AppTranslations.translate(widget.languageCode, 'accuracy'),
+                overallAccuracy,
+                100,
+                const Color(0xFF10B981),
+                showPercent: true,
+              ),
+              const SizedBox(height: 24),
+
+              Text(
+                AppTranslations.translate(widget.languageCode, 'completions_topic'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              for (final topic in topicProgress)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: _buildStatProgressRow(
+                    topic.key,
+                    topic.value,
+                    10,
+                    topic.key.hashCode.isEven ? const Color(0xFFD946EF) : const Color(0xFF06B6D4),
+                  ),
+                ),
+
+              const SizedBox(height: 24),
+              Text(
+                AppTranslations.translate(widget.languageCode, 'completions_type'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              for (final type in typeProgress)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: _buildStatProgressRow(
+                    _displayTypeLabel(type.key),
+                    type.value,
+                    10,
+                    type.key.hashCode.isEven ? const Color(0xFF3B82F6) : const Color(0xFF58CC02),
+                  ),
+                ),
+
+              const SizedBox(height: 32),
+              Text(
+                AppTranslations.translate(widget.languageCode, 'recent_activity'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...summary.recentActivities.map((activity) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E2F),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.04), width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: activity['color'] as Color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              activity['label'] as String,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              activity['detail'] as String,
+                              style: const TextStyle(color: Colors.white54, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        '${(activity['when'] as DateTime).hour.toString().padLeft(2, '0')}:${(activity['when'] as DateTime).minute.toString().padLeft(2, '0')}',
+                        style: const TextStyle(color: Colors.white38, fontSize: 12),
+                      ),
+                    ],
                   ),
                 );
-              },
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.redAccent.withOpacity(0.3)),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              }).toList(),
+
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _summaryFuture = _fetchSummaryData();
+                    });
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.blueAccent.withOpacity(0.3)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    AppTranslations.translate(widget.languageCode, 'refresh_progress'),
+                    style: const TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
               ),
-              child: Text(
-                AppTranslations.translate(widget.languageCode, 'reset_stats'),
-                style: const TextStyle(
-                  color: Colors.redAccent,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -1074,7 +1387,7 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Widget _buildStatProgressRow(String label, int completedCount, int targetCount, Color color) {
+  Widget _buildStatProgressRow(String label, int completedCount, int targetCount, Color color, {bool showPercent = false}) {
     /// Renders linear indicator lines charting progress achievements against a predefined lesson cap.
     final double progress = (completedCount / targetCount).clamp(0.0, 1.0);
 
@@ -1103,7 +1416,7 @@ class _FeedScreenState extends State<FeedScreen> {
                 ),
               ),
               Text(
-                "$completedCount Completed",
+                showPercent ? '$completedCount%' : "$completedCount Completed",
                 style: TextStyle(
                   color: color,
                   fontSize: 11,
@@ -1128,6 +1441,19 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   // --- GLOWING BOTTOM NAVIGATION BAR ---
+  String _displayTypeLabel(String rawType) {
+    switch (rawType.toLowerCase()) {
+      case 'swipe':
+        return AppTranslations.translate(widget.languageCode, 'swipe');
+      case 'mcq':
+        return AppTranslations.translate(widget.languageCode, 'mcq');
+      case 'slides':
+        return AppTranslations.translate(widget.languageCode, 'slides');
+      default:
+        return rawType.isEmpty ? rawType : rawType[0].toUpperCase() + rawType.substring(1);
+    }
+  }
+
   Widget _buildBottomNavigation() {
     /// Renders the customized navigation footer allowing users to switch between learning views.
     final items = [
@@ -1168,6 +1494,9 @@ class _FeedScreenState extends State<FeedScreen> {
                 onTap: () {
                   setState(() {
                     _selectedTabIndex = index;
+                    if (index == 3) {
+                      _summaryFuture = _fetchSummaryData();
+                    }
                   });
                 },
                 child: AnimatedContainer(

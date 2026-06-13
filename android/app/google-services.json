@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "31323305122",
+    "project_id": "team-project-mds",
+    "storage_bucket": "team-project-mds.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31323305122:android:c6946ac50c3993a41513fb",
+        "android_client_info": {
+          "package_name": "com.antigravity.edutiktok.edu_tiktok_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNnBaf5-Yb_e7_d-ygx4IGAoylN9-0OvE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

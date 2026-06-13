@@ -4,11 +4,18 @@
 /// It also provides a SmartphonePreviewWrapper to mock physical bezels on desktop.
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'screens/language_selection_screen.dart';
+import 'screens/login_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
   /// Main execution root of the application, ensuring Flutter engine bindings are ready before mounting the app.
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const EduTikTokApp());
 }
 
@@ -54,7 +61,7 @@ class EduTikTokApp extends StatelessWidget {
       builder: (context, child) {
         return SmartphonePreviewWrapper(child: child!);
       },
-      home: const LanguageSelectionScreen(),
+      home: const LoginScreen(),
     );
   }
 }

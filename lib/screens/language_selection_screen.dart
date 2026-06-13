@@ -3,13 +3,17 @@
 /// and supports language selection (English vs. Polish) with a custom route transition.
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../main.dart';
 import 'feed_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
+  final String loggedInUser;
+  final String loggedInPassword;
+
   const LanguageSelectionScreen({
     /// Default constructor for LanguageSelectionScreen.
     super.key,
+    required this.loggedInUser,
+    required this.loggedInPassword,
   });
 
   @override
@@ -56,7 +60,11 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
     /// Saves the language code selection and navigates to the FeedScreen with a custom fade transition.
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => FeedScreen(languageCode: langCode),
+        pageBuilder: (context, animation, secondaryAnimation) => FeedScreen(
+          languageCode: langCode,
+          loggedInUser: widget.loggedInUser,
+          loggedInPassword: widget.loggedInPassword,
+        ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: animation,

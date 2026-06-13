@@ -75,6 +75,7 @@ class FeedEngine {
       final nextCard = dueCards.first;
       return lessons.firstWhere(
         (lesson) => lesson.id == nextCard.id,
+        orElse: () => getNextLesson(),
       );
     }
     return getNextLesson();
@@ -86,6 +87,12 @@ class FeedEngine {
     ///Pick card correspoding to lesson ID
     final card = _reviewCards.firstWhere(
         (c) => c.id == lessonId,
+        orElse: () => reviewCard(
+          id: lessonId,
+          repetitions: 0,
+          lastReview: DateTime.now(),
+          nextReview: DateTime.now(),
+        ),
     );
     final now = DateTime.now();
     ///increment repetitions on correct answer, set repetitions to 0 on wrong answer
