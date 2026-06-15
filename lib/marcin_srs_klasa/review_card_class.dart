@@ -17,9 +17,9 @@ class reviewCard {
 
     return reviewCard(
       id : json['id'],
-      repetitions: json['repetitions'],
-      lastReview: json['lastReview'],
-      nextReview: json['nextReview']
+      repetitions: json['repetitions'] as int ,
+      lastReview: DateTime.parse(json['lastReview'] as String),
+      nextReview: DateTime.parse(json['nextReview'] as String),
     );
   }
 ///Instructs how to save a card to a json file

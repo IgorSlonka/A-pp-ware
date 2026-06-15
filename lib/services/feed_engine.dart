@@ -1,6 +1,8 @@
 /// This file defines the FeedEngine class, which handles fetching, managing, and indexing lesson content.
 /// It supports loading localized lesson data from assets and provides fallback hardcoded lessons in case of I/O failures.
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/services.dart';
 import '../models/lesson_model.dart';
@@ -35,7 +37,7 @@ class FeedEngine {
       final jsonString = await rootBundle.loadString('assets/data/review_cards.json');
       final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
       _reviewCards = jsonList.map((item) => reviewCard.fromJson(item as Map<String, dynamic>)).toList();
-      print("SUCCESSFULLY LOADED ${_reviewCards.length}");
+      print("SUCCESSFULLY LOADED ${_reviewCards.length} REVIEW CARDS");
     } catch (e, stack) {
       print("ERROR LOADING REVIEW CARDS");
       print(stack);
@@ -43,7 +45,19 @@ class FeedEngine {
   }
   /// Saves reviewCards
   Future<void> saveReviewCards() async {
-    ///
+    try{
+      final file = File('${Directory.current.path}/review_cards.json');
+
+      final jsonData = _reviewCards.map((card) => card.toJson()).toList();
+
+      await file.writeAsString(jsonEncode(jsonData));
+
+      print("SUCCESSFULLY SAVED REVIEW CARD");
+    } catch(e, stack) {
+      print("ERROR SAVING REVIEW CARDS: $e");
+      print(stack);
+    }
+      
   }
   /// Active method: returns a lesson selected randomly (RNG) from the loaded pool
   Lesson getNextLesson() {
@@ -59,13 +73,16 @@ class FeedEngine {
 
   Lesson getNextLessonSpacedRepetition() {
     final now = DateTime.now();
+    ///80% - random lesson, 20% - due card
+    final random = Random();
+    final roll = random.nextDouble();
 
     ///Picks cards whose nextReview is due
     final dueCards = _reviewCards.where(
       (card) => card.nextReview.isBefore(now),
     ).toList();
 
-    if(dueCards.isNotEmpty){
+    if(dueCards.isNotEmpty && roll < 0.2){
       ///Sorts with respect to nextReview
       dueCards.sort(
         (a,b) => a.nextReview.compareTo(b.nextReview),
@@ -82,30 +99,37 @@ class FeedEngine {
   }
 
   /// Hook to record card reviews (User answered True/False or MCQ)
-  void recordReview(String lessonId, bool wasCorrect) {
+  Future<void> recordReview(String lessonId, bool wasCorrect) async {
     /// Records user performance feedback to guide spaced repetition engines.
-    ///Pick card correspoding to lesson ID
-    final card = _reviewCards.firstWhere(
-        (c) => c.id == lessonId,
-        orElse: () => reviewCard(
-          id: lessonId,
-          repetitions: 0,
-          lastReview: DateTime.now(),
-          nextReview: DateTime.now(),
-        ),
-    );
+    //Pick card correspoding to lesson ID
     final now = DateTime.now();
-    ///increment repetitions on correct answer, set repetitions to 0 on wrong answer
-    if(wasCorrect){
-      card.repetitions ++;
 
-    } else{
-      card.repetitions = 0;
+    final index = _reviewCards.indexWhere((c) => c.id == lessonId);
+
+    if (index == -1) {
+      _reviewCards.add(
+        reviewCard(
+          id: lessonId,
+          repetitions: wasCorrect ? 1 : 0,
+          lastReview: now,
+          nextReview: now.add(const Duration(days: 1)),
+        ),
+      );
+    } else {
+      final card = _reviewCards[index];
+
+      card.lastReview = now;
+
+      if (wasCorrect) {
+        card.repetitions++;
+      } else {
+        card.repetitions = 0;
+      }
+
+      card.nextReview = now.add(card.getInterval());
     }
-    ///Udpate nextReview variable based on the switch case of repetitions inside getInterval() in the reviewCard class definition
-    card.nextReview = now.add(card.getInterval());
 
-    saveReviewCards();
+      await saveReviewCards();
   }
 
   /// Provides hardcoded data in case asset loader encounters issues in simple runners

@@ -230,6 +230,7 @@ class _FeedScreenState extends State<FeedScreen> {
   Future<void> _initFeedEngine() async {
     /// Connects to the local JSON database via FeedEngine to download relevant curriculum nodes.
     await _feedEngine.loadLessons(widget.languageCode);
+    await _feedEngine.loadReviewCards();
     _generateNewSession();
     setState(() {
       _isLoading = false;
